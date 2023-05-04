@@ -1,0 +1,7 @@
+API_ID = 12345678
+SEU_API_HASH
+BOT_TOKEN = SEU_TOKEN_DO_BOT
+MONGODB = mongodb+srv://USUARIO:SENHA@ftp.abcdefgh.mongodb.net/?retryWrites=true&w=majority
+CHAT_ID = -10012345678910
+HOST = 0.0.0.0
+PORT = 9021
