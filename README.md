@@ -37,7 +37,7 @@
 ### Upload Turbo (Staging Local)
 Cliente FTP envia → Disco local (instantâneo) → Telegram (background)
 
-text
+
 ✅ Sem timeouts  
 ✅ Sem travamentos  
 ✅ 100% compatível com RaiDrive/Windows Explorer  
@@ -47,8 +47,6 @@ text
 Abre PDF de 500MB instantaneamente
 Assiste vídeo 4K sem buffer completo
 Funciona com Kodi, VLC, Emby, Plex
-
-text
 
 ### Screenshots
 
@@ -94,7 +92,6 @@ docker-compose up -d
 
 docker-compose logs -f nebulaftp
 
-text
 
 **📖 [Guia Completo Docker →](docs/DOCKER.md)**
 
@@ -122,7 +119,6 @@ nano .env
  ```
 python main.py
  ```
-text
 
 **📖 [Guia Instalação Completa →](docs/INSTALLATION.md)**
 
@@ -172,7 +168,7 @@ O **Nebula FTP** faz parte de um ecossistema maior:
 ## ⚙️ Configuração (.env)
 
 API do Telegram (obtenha em my.telegram.org)
-
+ ```
 API_ID=12345678
 API_HASH=abc123def456...
 Tokens dos Bots (crie com @BotFather)
@@ -198,7 +194,7 @@ Logging
 
 LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR
 
-text
+ ```
 
 **📖 [Configuração Avançada →](docs/INSTALLATION.md#configuração-avançada)**
 
@@ -248,7 +244,6 @@ text
 │ (Metadados) │ │ (Arquivos) │
 └────────────────┘ └────────────────┘
 
-text
 
 ### Tecnologias
 
@@ -291,8 +286,7 @@ Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para detalhes.
 - **Discussões:** [GitHub Discussions](https://github.com/samucamg/NebulaFTP/discussions)
 
 ### 📧 Contato Direto
-- **Email:** samuel@inglescurso.com
-- **Twitter:** [@samucamg](https://twitter.com/samucamg)
+- **Email:** samuel@inglescurso.com.br  apenas para assuntos comerciais, não dou suporte, não tiro dúvidas.  Atendo apenas comercialmente.
 
 ---
 
