@@ -1,30 +1,323 @@
-# SamucaFTP
-Utilize o espaço ilimitado do telegram para guardar todos seus arquivos em um chat, e acessar por ftp.
+<div align="center">
 
-Use o espaço ilimitado do telegram como backup via ftp.
+# 🌌 Nebula FTP
 
-Antes de qualquer coisa, você precisa de um servidor ou vps linux, caso não tenha, pode instalar o wsl 2 no seu computador windows, e instalar o sistema operacional ubuntu 20.04 ou ubuntu 22.04.  Você pode ver como fazer no tutorial do site da Microssoft sobre [Como Instalar o Wsl2] (https://learn.microsoft.com/pt-br/windows/wsl/install)
+### **Transforme o Telegram em seu Armazenamento Ilimitado**
 
-Você também irá encontrar vários tutoriais no youtube ensinando como habilitar o wsl 2 e instalar o ubuntu no seu servidor windows no [youtube.] (https://www.youtube.com/results?search_query=Como+instalar+o+wsl2+no+windows&sp=CAASAhAB)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Após instalar o Wsl2 no seu computador, baixe o zip desse repositório em releases descompacte abra a página onde o mesmo se encontra, e digite "bash" como
-mostrado nas figuras abaixo, para acessar o ambiente linux:
+[🇧🇷 Português](#) | [🇺🇸 English](README-en.md)
 
+[📖 Documentação](#-documentação) • [🚀 Início Rápido](#-início-rápido) • [🎥 Vídeo](#-vídeo-tutorial) • [💬 Suporte](#-suporte)
 
+</div>
 
-![SamucaFtp](https://i.imgur.com/OB9RKOJ.jpg)
+---
 
+## 🎯 O que é o Nebula FTP?
 
+**Nebula FTP** é um servidor FTP profissional que usa o **Telegram como backend de armazenamento**, oferecendo:
 
+✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)  
+⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta)  
+🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)  
+🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo (Smart Seek)  
+🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente  
+👥 **Multi-Usuário** - Sistema completo de permissões por pasta  
+🐳 **Docker Ready** - Instalação em 1 comando  
+🛡️ **Production-Grade** - Retry logic, logs, métricas e graceful shutdown  
 
+---
 
+## 📊 Demonstração
 
+### Upload Turbo (Staging Local)
+Cliente FTP envia → Disco local (instantâneo) → Telegram (background)
 
+text
+✅ Sem timeouts  
+✅ Sem travamentos  
+✅ 100% compatível com RaiDrive/Windows Explorer  
 
+### Download Streaming
 
+Abre PDF de 500MB instantaneamente
+Assiste vídeo 4K sem buffer completo
+Funciona com Kodi, VLC, Emby, Plex
 
+text
 
+### Screenshots
 
+<details>
+<summary>📸 Clique para ver capturas de tela</summary>
+
+![FileZilla conectado](docs/images/screenshot_filezilla.png)
+*FileZilla transferindo 15GB de filmes*
+
+![RaiDrive montado](docs/images/screenshot_raidrive.png)
+*Drive Z: montado no Windows Explorer*
+
+</details>
+
+---
+
+## 🎥 Vídeo Tutorial
+
+> 🎬 **Em breve:** Tutorial completo de instalação e configuração
+
+[![Nebula FTP Tutorial](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://youtube.com/watch?v=VIDEO_ID)
+
+---
+
+## 🚀 Início Rápido
+
+### Opção 1: Docker (Recomendado) 🐳
+
+1. Clone o repositório
+ ```
+git clone https://github.com/samucamg/NebulaFTP.git
+cd NebulaFTP
+ ```
+2. Configure o .env
+ ```
+cp .env.example .env
+nano .env # Preencha seus dados
+ ```
+3. Inicie!
+
+docker-compose up -d
+4. Veja os logs
+
+docker-compose logs -f nebulaftp
+
+text
+
+**📖 [Guia Completo Docker →](docs/DOCKER.md)**
+
+---
+
+### Opção 2: Python Direto 🐍
+
+1. Clone e prepare ambiente
+ ```
+git clone https://github.com/samucamg/NebulaFTP.git
+cd NebulaFTP
+python3 -m venv venv
+source venv/bin/activate # Windows: venv\Scripts\activate
+ ```
+2. Instale dependências
+ ```
+pip install -r requirements.txt
+ ```
+3. Configure
+ ```
+cp .env.example .env
+nano .env
+ ```
+4. Rode
+ ```
+python main.py
+ ```
+text
+
+**📖 [Guia Instalação Completa →](docs/INSTALLATION.md)**
+
+---
+
+## 📖 Documentação
+
+### 🎓 Para Iniciantes
+
+1. **[📱 Configurar Telegram](docs/TELEGRAM_SETUP.md)**
+   - Obter API ID e API Hash
+   - Criar bots com @BotFather
+   - Criar canais e adicionar bots como admin
+
+2. **[💾 Instalação Python](docs/INSTALLATION.md)**
+   - Windows, Linux, macOS
+   - Passo a passo detalhado
+   - Solução de problemas
+
+3. **[🐳 Instalação Docker](docs/DOCKER.md)**
+   - Docker Desktop (Windows/Mac)
+   - Docker Engine (Linux)
+   - docker-compose explicado
+
+4. **[👥 Gerenciar Usuários](docs/USER_MANAGEMENT.md)**
+   - Criar contas FTP
+   - Permissões (leitura/escrita)
+   - Limitar acesso por pasta
+
+---
+
+### 🏗️ Ecossistema Nebula
+
+O **Nebula FTP** faz parte de um ecossistema maior:
+
+| Projeto | Descrição | Status |
+|---------|-----------|--------|
+| **[NebulaFTP](https://github.com/samucamg/NebulaFTP)** | Servidor FTP com Telegram | ✅ **Você está aqui** |
+| **[NebulaStream](docs/ECOSYSTEM.md#nebulastream)** | Interface Web + Player | 🚧 Em desenvolvimento |
+| **[NebulaWebDAV](docs/ECOSYSTEM.md#nebulawebdav)** | Servidor WebDAV para Kodi/Plex | 🚧 Em desenvolvimento |
+| **[NebulaSFTP](docs/ECOSYSTEM.md#nebulasftp)** | Servidor SFTP (SSH) | 📋 Planejado |
+
+**📖 [Saiba mais sobre o Ecossistema →](docs/ECOSYSTEM.md)**
+
+---
+
+## ⚙️ Configuração (.env)
+
+API do Telegram (obtenha em my.telegram.org)
+
+API_ID=12345678
+API_HASH=abc123def456...
+Tokens dos Bots (crie com @BotFather)
+
+BOT_TOKENS=1234567890:AABBcc...,9876543210:AAFFdd...
+IDs dos Canais (copie de @userinfobot)
+
+CHAT_ID=-1001234567890
+BACKUP_CHAT_ID=-1009876543210 # Opcional
+MongoDB (local ou Atlas)
+
+MONGODB=mongodb://localhost:27017
+Servidor FTP
+
+HOST=0.0.0.0
+PORT=2121
+Performance
+
+MAX_WORKERS=4 # Workers de upload
+CHUNK_SIZE_MB=64 # Tamanho dos chunks
+MAX_RETRIES=5 # Tentativas de retry
+Logging
+
+LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR
+
+text
+
+**📖 [Configuração Avançada →](docs/INSTALLATION.md#configuração-avançada)**
+
+---
+
+## 🎯 Casos de Uso
+
+### 🏠 Uso Pessoal
+- Backup automático de fotos/vídeos
+- Biblioteca de filmes/séries pessoal
+- Sincronização entre dispositivos
+
+### 🏢 Uso Profissional
+- Servidor de arquivos para equipe pequena
+- Backup de projetos e documentos
+- Streaming de conteúdo educacional
+
+### 🎓 Educacional
+- Distribuição de materiais didáticos
+- Repositório de aulas gravadas
+- Compartilhamento de e-books
+
+---
+
+## 🔧 Recursos Técnicos
+
+### Arquitetura
+
+┌─────────────────────────────────────────────┐
+│ Cliente FTP (FileZilla) │
+└─────────────────┬───────────────────────────┘
+│
+┌─────────────────▼───────────────────────────┐
+│ Nebula FTP Server (Python) │
+│ ┌──────────────────────────────────────┐ │
+│ │ - Multi-Bot Manager (Round Robin) │ │
+│ │ - Smart Seek (Streaming) │ │
+│ │ - Retry Logic (5x + Backoff) │ │
+│ │ - Garbage Collector (Auto-Clean) │ │
+│ └──────────────────────────────────────┘ │
+└─────────────────┬───────────────────────────┘
+│
+┌─────────┴─────────┐
+│ │
+┌───────▼────────┐ ┌───────▼────────┐
+│ MongoDB │ │ Telegram │
+│ (Metadados) │ │ (Arquivos) │
+└────────────────┘ └────────────────┘
+
+text
+
+### Tecnologias
+
+- **Python 3.10+** - Linguagem principal
+- **Pyrogram** - Cliente MTProto (rápido)
+- **pyftpdlib** - Servidor FTP assíncrono
+- **Motor** - Driver MongoDB assíncrono
+- **aiofiles** - I/O assíncrono de arquivos
+- **Docker** - Containerização
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Veja nosso [Guia de Contribuição](CONTRIBUTING.md).
+
+### Como ajudar:
+- 🐛 Reportar bugs
+- 💡 Sugerir melhorias
+- 📝 Melhorar documentação
+- 🌍 Traduzir para outros idiomas
+- ⭐ Dar uma estrela no projeto!
+
+---
+
+## 📜 Licença
+
+Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para detalhes.
+
+---
+
+## 💬 Suporte
+
+### 💬 Comunidade
+- **Telegram:** [t.me/NebulaFTP](https://t.me/NebulaFTP)
+- **Discord:** [discord.gg/nebula](https://discord.gg/nebula)
+
+### 🐛 Bugs e Sugestões
+- **Issues:** [GitHub Issues](https://github.com/samucamg/NebulaFTP/issues)
+- **Discussões:** [GitHub Discussions](https://github.com/samucamg/NebulaFTP/discussions)
+
+### 📧 Contato Direto
+- **Email:** samuel@inglescurso.com
+- **Twitter:** [@samucamg](https://twitter.com/samucamg)
+
+---
+
+## 🌟 Agradecimentos
+
+Agradecimentos especiais a minha esposa e meu filho por aguentarem as longas horas de trabalho e desenvolvimento.
+
+---
+
+## 📊 Estatísticas
+
+![GitHub Stars](https://img.shields.io/github/stars/samucamg/NebulaFTP?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/samucamg/NebulaFTP?style=social)
+![GitHub Issues](https://img.shields.io/github/issues/samucamg/NebulaFTP)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/samucamg/NebulaFTP)
+
+---
+
+<div align="center">
+
+**Feito com ❤️ por [Samuel de Sousa Santos](https://github.com/samucamg)**
+
+[⬆ Voltar ao topo](#-nebula-ftp)
+
+</div>
 
 
 ![SamucaFtp bash](https://i.imgur.com/PNNrmwA.jpg)
@@ -51,7 +344,7 @@ mostrado nas figuras abaixo, para acessar o ambiente linux:
 <details>
 <summary><b>Setup:</b></summary>
 Antes de iniciar o setup, verifique se você tem o python3 instalado, ou instale utilizando o comando abaixo:
-sudo apt update && sudo apt install python3-pip -y
+ ```sudo apt update && sudo apt install python3-pip -y ```
 A seguir:
 
   1. Crie um novo bot em [BotFather](https://telegram.dog/botfather).
