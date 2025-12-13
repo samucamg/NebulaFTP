@@ -1,13 +1,17 @@
 from locale import LC_ALL, setlocale as _setlocale
 from threading import Lock
 from contextlib import contextmanager
-from asyncio import IncompleteReadError
+from asyncio import IncompleteReadError, Queue
+
+# ADICIONADO: Fila Global de Upload
+UPLOAD_QUEUE = Queue()
 
 __all__ = (
     "StreamIO",
     "wrap_with_container",
     "AbstractAsyncLister",
     "setlocale",
+    "UPLOAD_QUEUE", # Exportar a fila
 )
 
 class AsyncStreamIterator:

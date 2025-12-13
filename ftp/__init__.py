@@ -1,18 +1,18 @@
-"""ftp client/server for asyncio"""
-# flake8: noqa
+# ftp/__init__.py
 
-from .common import *
-from .errors import *
-from .pathio import *
-from .server import *
+# Importamos explicitamente as classes necessárias
+from .server import Server, MongoDBUserManager, User, Permission
+from .pathio import MongoDBPathIO
+from .common import UPLOAD_QUEUE
+from .errors import PathIOError
 
-__version__ = "0.21.2"
-version = tuple(map(int, __version__.split(".")))
-
-__all__ = (
-    server.__all__ +
-    errors.__all__ +
-    common.__all__ +
-    pathio.__all__ +
-    ("version", "__version__")
-)
+# Definimos o que este pacote exporta para o mundo
+__all__ = [
+    "Server",
+    "MongoDBUserManager",
+    "User",
+    "Permission",
+    "MongoDBPathIO",
+    "UPLOAD_QUEUE",
+    "PathIOError"
+]
