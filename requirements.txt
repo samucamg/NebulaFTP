@@ -1,8 +1,5 @@
-pyrogram
-pymongo
-pymongo[srv]
+pyftpdlib
+motor==2.5.1
+pymongo==3.12.3
 dnspython
-motor
-chardet
-python-dotenv
-tgcrypto
+asyncio
