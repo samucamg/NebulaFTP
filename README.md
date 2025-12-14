@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌌 Nebula FTP
+<img src="https://raw.githubusercontent.com/samucamg/NebulaFTP/refs/heads/master/img/logo_nebula_ftp.png" alt="Logo Nebula FTP" width="300px">
 
 ### **Transforme o Telegram em seu Armazenamento Ilimitado**
 
