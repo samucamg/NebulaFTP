@@ -3,3 +3,9 @@ motor==2.5.1
 pymongo==3.12.3
 dnspython
 asyncio
+aiofiles
+pyrogram
+tgcrypto
+dnspython
+python-dotenv
+requests
