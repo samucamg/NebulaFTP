@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    container_name: nebula_ftp
+    restart: unless-stopped
+    # MÁGICA AQUI: Usamos a rede do host. O container age como um processo normal na VPS.
+    # Sem problemas de NAT, sem problemas de portas passivas.
+    network_mode: host
+    volumes:
+      - ./staging:/app/staging
+      - ./FTP_Bot.session:/app/FTP_Bot.session
+      - ./nebula.log:/app/nebula.log
+      - ./.env:/app/.env
+    environment:
+      # Como estamos no modo host, o container vê o mongo na porta local
+      - MONGODB=mongodb://127.0.0.1:27017
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:4.4
+    container_name: nebula_mongo
+    restart: unless-stopped
+    ports:
+      # Expomos o mongo para o 'localhost' da VPS para o app conseguir conectar
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+
