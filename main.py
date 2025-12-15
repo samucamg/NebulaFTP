@@ -24,7 +24,7 @@ if exists(".env"):
 # --- CARREGAMENTO DE CONFIGURAÇÕES DO .ENV ---
 LOG_LEVEL = environ.get("LOG_LEVEL", "INFO")
 CHUNK_SIZE_MB = int(environ.get("CHUNK_SIZE_MB", 64))
-CHUNK_SIZE = CHUNK_SIZE_MB * 1024 * 1024
+CHUNK_SIZE = CHUNK_SIZE_MB * 1024 * 1024 
 MAX_RETRIES = int(environ.get("MAX_RETRIES", 5))
 MAX_STAGING_AGE = int(environ.get("MAX_STAGING_AGE", 3600))
 MAX_WORKERS = int(environ.get("MAX_WORKERS", 4))
@@ -37,6 +37,11 @@ if pp_str and "-" in pp_str:
         start_p, end_p = map(int, pp_str.split("-"))
         PASSIVE_PORTS = range(start_p, end_p + 1)
     except: pass
+
+# --- CONTROLE DE LOCKS (PROTEÇÃO) ---
+# Conjunto para armazenar caminhos de arquivos que estão sendo enviados agora.
+# O Garbage Collector NÃO pode tocar nestes arquivos.
+ACTIVE_UPLOADS = set()
 
 # --- LOGGING ---
 log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -71,7 +76,7 @@ async def setup_database_indexes(mongo):
         await mongo.files.create_index("parent")
         await mongo.files.create_index("uploadId", sparse=True)
         await mongo.files.create_index("uploaded_at")
-        await mongo.files.create_index("status")
+        await mongo.files.create_index("status") 
         logger.info("✅ Índices verificados.")
     except Exception as e: logger.warning(f"⚠️ Aviso índices: {e}")
 
@@ -86,31 +91,39 @@ async def garbage_collector():
                     for f in files:
                         if f.endswith(".partial"): continue
                         fp = os.path.join(root, f)
+                        
+                        # --- PROTEÇÃO CRÍTICA ---
+                        # Se o arquivo estiver sendo enviado, PULA.
+                        if fp in ACTIVE_UPLOADS:
+                            continue
+                        # ------------------------
+
                         if now - os.path.getmtime(fp) > MAX_STAGING_AGE:
-                            try: os.remove(fp); logger.warning(f"🧹 GC: Lixo removido: {f}")
-                            except Exception as e: logger.error(f"❌ GC Erro {f}: {e}")
+                            try: 
+                                os.remove(fp) 
+                                logger.warning(f"🧹 GC: Lixo removido: {f}")
+                            except Exception as e: 
+                                logger.error(f"❌ GC Erro {f}: {e}")
         except Exception as e: logger.error(f"❌ GC Falha Geral: {e}")
         await asyncio.sleep(600)
 
 async def folder_watcher(mongo):
     """
     Vigia a pasta 'staging' RECURSIVAMENTE.
-    CORREÇÃO CRÍTICA: Mapeia arquivos para a PASTA DO UTILIZADOR e não para a Raiz.
+    Mapeia arquivos para a PASTA DO UTILIZADOR.
     """
     logger.info("👀 Folder Watcher Iniciado")
     staging_dir = "staging"
     if not os.path.exists(staging_dir): os.makedirs(staging_dir)
 
-    # 1. Identificar o utilizador principal para definir a Home
-    # O FTP virtual é baseado no utilizador. Arquivos na raiz "/" geralmente ficam invisíveis.
-    target_root = "/"
+    target_root = "/" 
     try:
         user = await mongo.users.find_one({})
         if user:
             target_root = f"/{user['login']}"
             logger.info(f"🎯 Modo MonoBot: Arquivos de staging irão para: {target_root}")
         else:
-            logger.warning("⚠️ Nenhum utilizador encontrado no DB. Arquivos irão para a Raiz '/' (pode causar invisibilidade).")
+            logger.warning("⚠️ Nenhum utilizador encontrado no DB. Arquivos irão para a Raiz '/'.")
     except Exception as e:
         logger.error(f"❌ Erro ao buscar utilizador: {e}")
 
@@ -120,50 +133,39 @@ async def folder_watcher(mongo):
                 for f in files:
                     if f.endswith(".partial"): continue
                     fp = os.path.join(root, f)
-
+                    
                     if not os.path.isfile(fp): continue
+                    
+                    # Ignora se já estiver sendo enviado (evita duplicar na fila)
+                    if fp in ACTIVE_UPLOADS: continue
+
                     size_t1 = os.path.getsize(fp)
                     if size_t1 == 0: continue
 
-                    # 2. Calcular caminho virtual relativo à Home do utilizador
                     rel_dir = os.path.relpath(root, staging_dir)
-
+                    
                     if rel_dir == ".":
-                        # Ex: staging/video.mp4 -> /samuel/video.mp4
                         parent_path = target_root
                     else:
-                        # Ex: staging/Filmes/video.mp4 -> /samuel/Filmes/video.mp4
                         normalized_rel = rel_dir.replace(os.sep, "/")
-                        if target_root == "/":
-                            parent_path = f"/{normalized_rel}"
-                        else:
-                            parent_path = f"{target_root}/{normalized_rel}"
+                        if target_root == "/": parent_path = f"/{normalized_rel}"
+                        else: parent_path = f"{target_root}/{normalized_rel}"
 
-                    # 3. Verificar existência
                     doc = await mongo.files.find_one({"name": f, "parent": parent_path})
-
+                    
                     if not doc:
                         await asyncio.sleep(2)
                         if os.path.getsize(fp) != size_t1: continue
 
-                        logger.info(f"👀 Detectado: {f} -> Destino Virtual: {parent_path}")
-
-                        # 4. Criar Árvore de Diretórios Virtual (Essencial para o FTP listar)
-                        # Precisamos garantir que /samuel, /samuel/Filmes, etc. existam
+                        logger.info(f"👀 Detectado: {f} -> {parent_path}")
+                        
                         if parent_path != "/":
                             parts = parent_path.strip("/").split("/")
                             current_parent = "/"
-
                             for part in parts:
-                                # Não cria registro para a raiz
                                 await mongo.files.update_one(
                                     {"name": part, "parent": current_parent},
-                                    {"$setOnInsert": {
-                                        "type": "dir",
-                                        "ctime": int(time.time()),
-                                        "mtime": int(time.time()),
-                                        "size": 0
-                                    }},
+                                    {"$setOnInsert": {"type": "dir", "ctime": int(time.time()), "mtime": int(time.time()), "size": 0}},
                                     upsert=True
                                 )
                                 if current_parent == "/": current_parent = "/" + part
@@ -174,7 +176,7 @@ async def folder_watcher(mongo):
                             "status": "staging", "local_path": fp,
                             "mtime": int(time.time()), "ctime": int(time.time()), "parts": []
                         }
-
+                        
                         try:
                             await mongo.files.insert_one(file_doc)
                             await UPLOAD_QUEUE.put({
@@ -186,52 +188,55 @@ async def folder_watcher(mongo):
 
         except Exception as e:
             logger.error(f"❌ Erro Watcher: {e}")
-
+        
         await asyncio.sleep(5)
 
 async def upload_worker(bot, target_chat_id, mongo, worker_id):
     logger.info(f"👷 Worker #{worker_id} Pronto")
-
+    
     while True:
         try: task = await asyncio.wait_for(UPLOAD_QUEUE.get(), timeout=2.0)
         except asyncio.TimeoutError: continue
-
+            
         local_path = task["path"]; filename = task["filename"]; parent = task["parent"]
-
-        if filename.endswith(".partial"):
-            UPLOAD_QUEUE.task_done(); continue
+        
+        # --- LOCK: Bloqueia o arquivo para o GC não apagar ---
+        ACTIVE_UPLOADS.add(local_path)
+        # -----------------------------------------------------
 
         try:
-            if not os.path.exists(local_path): UPLOAD_QUEUE.task_done(); continue
-            await asyncio.sleep(1)
+            if filename.endswith(".partial"): continue
+
+            if not os.path.exists(local_path): continue
+            
             real_size = os.path.getsize(local_path)
             if real_size == 0:
                 try: os.remove(local_path)
                 except: pass
-                UPLOAD_QUEUE.task_done(); continue
+                continue
 
             logger.info(f"⬆️ [W{worker_id}] Processando: {filename} ({real_size/1024/1024:.2f} MB)")
-
+            
             file_doc = await mongo.files.find_one({"name": filename, "parent": parent})
             if not file_doc:
                 logger.warning(f"⚠️ [W{worker_id}] Metadados não encontrados: {filename}")
-                UPLOAD_QUEUE.task_done(); continue
+                continue
 
             file_uuid = str(uuid.uuid4())
             parts_metadata = []
             upload_failed = False
-
+            
             try:
                 async with aiofiles.open(local_path, "rb") as f:
                     part_num = 0
                     while True:
                         chunk_data = await f.read(CHUNK_SIZE)
                         if not chunk_data: break
-
+                        
                         chunk_name = f"{file_uuid}.part_{part_num:03d}"
-                        mem_file = io.BytesIO(chunk_data); mem_file.name = chunk_name
+                        mem_file = io.BytesIO(chunk_data); mem_file.name = chunk_name 
                         sent_msg = None
-
+                        
                         for attempt in range(1, MAX_RETRIES + 1):
                             try:
                                 mem_file.seek(0)
@@ -242,7 +247,7 @@ async def upload_worker(bot, target_chat_id, mongo, worker_id):
                                     force_document=True,
                                     caption=""
                                 )
-                                break
+                                break 
                             except FloodWait as e:
                                 w = e.value + 2; logger.warning(f"⏳ [W{worker_id}] FloodWait: {w}s")
                                 await asyncio.sleep(w)
@@ -251,7 +256,7 @@ async def upload_worker(bot, target_chat_id, mongo, worker_id):
                                 await asyncio.sleep(w)
                             except Exception as e:
                                 logger.error(f"❌ [W{worker_id}] Erro: {e}"); await asyncio.sleep(5)
-
+                        
                         if not sent_msg: raise Exception(f"Falha upload parte {part_num}")
 
                         parts_metadata.append({
@@ -271,23 +276,25 @@ async def upload_worker(bot, target_chat_id, mongo, worker_id):
                 )
                 logger.info(f"✅ [W{worker_id}] Concluído: {filename}")
                 Metrics.log_success(real_size)
+                # Agora sim o GC ou nós mesmos podemos remover
                 try: os.remove(local_path)
                 except: pass
-
+            
         except Exception as e: logger.error(f"❌ [W{worker_id}] Crítico: {e}")
-        finally: UPLOAD_QUEUE.task_done()
+        finally:
+            # --- UNLOCK: Libera o arquivo ---
+            ACTIVE_UPLOADS.discard(local_path)
+            UPLOAD_QUEUE.task_done()
 
 async def resolve_channel(bot):
     raw_chat = environ.get("CHAT_ID")
     target_chat = int(raw_chat) if raw_chat and raw_chat.lstrip("-").isdigit() else raw_chat
 
     logger.info("🔍 Verificando acesso ao canal...")
-
     try:
-        async for dialog in bot.get_dialogs(limit=50):
-            pass
+        async for dialog in bot.get_dialogs(limit=50): pass 
     except: pass
-
+    
     try:
         chat = await bot.get_chat(target_chat)
         logger.info(f"✅ Canal Confirmado: {chat.title} (ID: {chat.id})")
@@ -318,25 +325,25 @@ async def main():
         mongo = AsyncIOMotorClient(environ.get("MONGODB"), io_loop=loop, w="majority").ftp
         await setup_database_indexes(mongo)
     except Exception as e: logger.critical(f"❌ Erro DB: {e}"); return
-
-    MongoDBPathIO.db = mongo; MongoDBPathIO.tg = bot
+    
+    MongoDBPathIO.db = mongo; MongoDBPathIO.tg = bot 
     server = Server(MongoDBUserManager(mongo), MongoDBPathIO)
-
+    
     asyncio.create_task(garbage_collector())
     asyncio.create_task(stats_reporter())
     asyncio.create_task(folder_watcher(mongo))
-
+    
     for i in range(MAX_WORKERS): asyncio.create_task(upload_worker(bot, target_chat_id, mongo, i+1))
-
+    
     port = int(environ.get("PORT", 2121))
     logger.info(f"🚀 Nebula FTP (MonoBot) Rodando na porta {port}")
-
+    
     ftp_server_task = asyncio.create_task(server.run(environ.get("HOST", "0.0.0.0"), port))
-
+    
     stop_event = asyncio.Event()
     loop.add_signal_handler(signal.SIGINT, stop_event.set)
     loop.add_signal_handler(signal.SIGTERM, stop_event.set)
-
+    
     try: await stop_event.wait()
     except asyncio.CancelledError: pass
     finally:
