@@ -142,12 +142,8 @@ python main.py
 
 Você verá:
 2025-12-13 00:00:00,000 - INFO - 🤖 Inicializando 2 bots...
-
 2025-12-13 00:00:01,000 - INFO - ✅ Canal Principal Confirmado: Nebula FTP (ID: -1001234567890)
-
 2025-12-13 00:00:02,000 - INFO - 🚀 Nebula FTP v2.3 Rodando na porta 2121
-
-
 ✅ **Servidor Online!**
 
 ---
@@ -195,7 +191,6 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-
 ### 7. Configurar .env
 
 Copie `.env.example` para `.env` e edite no Notepad.
@@ -211,7 +206,6 @@ python setup_database.py
 ```
 python accounts_manager.py
 ```
-
 
 ### 10. Iniciar
 
@@ -253,7 +247,6 @@ A partir do passo 3 do guia Linux, os comandos são idênticos.
 sudo nano /etc/systemd/system/nebulaftp.service
 ```
 
-
 Cole:
 
 ```
@@ -285,7 +278,6 @@ Ver logs
 sudo journalctl -u nebulaftp -f
 ```
 
-
 ---
 
 ## 🔧 Configuração Avançada
@@ -296,14 +288,14 @@ Em `.env`:
 PORT=2121 # Mude para qualquer porta > 1024
 
 
-### Adicionar Mais Bots
+### Adicionar Mais Bots (Apenas versão Pro)
 
 Crie novos bots e adicione ao `.env` separados por vírgula:
 
 BOT_TOKENS=bot1:token,bot2:token,bot3:token
 
 
-### Aumentar Performance
+### Aumentar Performance (Melhor performance na versão Pró)
 
 MAX_WORKERS=8 # Mais workers = mais uploads simultâneos
 CHUNK_SIZE_MB=128 # Chunks maiores = menos partes por arquivo
@@ -321,7 +313,6 @@ source venv/bin/activate # Ative o venv primeiro!
 pip install -r requirements.txt
 ```
 
-
 ### "Connection refused" ao conectar no FTP
 
 **Causas possíveis:**
@@ -336,7 +327,6 @@ sudo netstat -tulpn | grep 2121
 Liberar no firewall
 
 sudo ufw allow 2121/tcp
-
 
 ### "Peer id invalid" nos logs
 
