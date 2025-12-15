@@ -26,14 +26,16 @@ Bem-vindo ao **NebulaFTP Community Edition**! Este guia vai te ensinar como tran
 
 ### 1. Instalar Docker + Docker Compose
 
-```bash
+```
 # Download do instalador oficial do Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
-
+```
 # Executar instalador
+```
 sudo sh get-docker.sh
-
+```
 # Remover arquivo de instalação
+```
 rm get-docker.sh
 ```
 
