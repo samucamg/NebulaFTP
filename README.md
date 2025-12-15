@@ -166,7 +166,7 @@ O **Nebula FTP** faz parte de um ecossistema maior:
 |---------|-----------|--------|
 | **[NebulaFTP](docs/ECOSYSTEM.md#-nebulaftp)** | Servidor FTP com Telegram | ✅ **Você está aqui** |
 | **[NebulaStream](docs/ECOSYSTEM.md#-nebulastreaming)** | Interface Web + Player | 🚧 Em desenvolvimento |
-| **[NebulaWebDAV](docs/ECOSYSTEM.md#-nebulawebdav)** | Servidor WebDAV para Kodi/Plex | 🚧 Em desenvolvimento |
+| **[NebulaWebDAV](docs/ECOSYSTEM.md#%EF%B8%8F-nebulawebdav)** | Servidor WebDAV para Kodi/Plex | 🚧 Em desenvolvimento |
 | **[NebulaSFTP](docs/ECOSYSTEM.md#-nebulasftp)** | Servidor SFTP (SSH) | 📋 Planejado |
 
 **📖 [Saiba mais sobre o Ecossistema →](docs/ECOSYSTEM.md)**
