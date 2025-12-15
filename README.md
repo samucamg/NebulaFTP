@@ -21,14 +21,14 @@
 
 **Nebula FTP** é um servidor FTP profissional que usa o **Telegram como backend de armazenamento**, oferecendo:
 
-✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)  
-⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta)  **(Velocidade Máxima com Multi-Bot)** 
-🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)  
-🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo **(Apenas no Nebula Stream)**  
-🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente  **(Apenas na Versão Pro)** 
-👥 **Multi-Usuário** - Sistema completo de permissões por pasta  
-🐳 **Docker Ready** - Instalação em 1 comando  
-🛡️ **Production-Grade** - Retry logic, logs, métricas e graceful shutdown  
+- ✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)
+- ⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta) **(Velocidade Máxima com Multi-Bot)**
+- 🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)
+- ~~🎬 **Streaming Inteligente**~~ - Assista vídeos 4K sem baixar tudo **(Apenas no Nebula Stream)**
+- 🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente, aumentando a performance. **(Apenas na Versão Pro)**
+- 👥 **Multi-Usuário** - Sistema completo de permissões por pasta. 
+- 🐳 **Docker Ready** - Instalação em 1 comando
+- 🛡️ **Production-Grade** - Retry logic, logs, métricas e graceful shutdown
 
 ---
 
@@ -37,16 +37,9 @@
 ### Upload Turbo (Staging Local)
 Cliente FTP envia → Disco local (instantâneo) → Telegram (background)
 
-
 ✅ Sem timeouts  
 ✅ Sem travamentos  
-✅ 100% compatível com RaiDrive/Windows Explorer  
-
-### Download Streaming
-
-Abre PDF de 500MB instantaneamente
-Assiste vídeo 4K sem buffer completo
-Funciona com Kodi, VLC, Emby, Plex
+✅ Compatível com RaiDrive/Windows Explorer  **(Não funciona para streaming)**
 
 ### Screenshots
 
