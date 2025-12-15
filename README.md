@@ -22,10 +22,10 @@
 **Nebula FTP** é um servidor FTP profissional que usa o **Telegram como backend de armazenamento**, oferecendo:
 
 ✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)  
-⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta)  
+⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta)  **(Velocidade Máxima com Multi-Bot)** 
 🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)  
-🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo (Smart Seek)  
-🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente  
+🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo **(Apenas no Nebula Stream)**  
+🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente  **(Apenas na Versão Pro)** 
 👥 **Multi-Usuário** - Sistema completo de permissões por pasta  
 🐳 **Docker Ready** - Instalação em 1 comando  
 🛡️ **Production-Grade** - Retry logic, logs, métricas e graceful shutdown  
