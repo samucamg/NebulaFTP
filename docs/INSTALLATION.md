@@ -129,7 +129,6 @@ python setup_database.py
 python accounts_manager.py
 ```
 
-
 Exemplo:
 Username: samuel
 Password: minhasenha123
@@ -141,10 +140,11 @@ Home path (default /samuel): [ENTER]
 python main.py
 ```
 
-
 Você verá:
 2025-12-13 00:00:00,000 - INFO - 🤖 Inicializando 2 bots...
+
 2025-12-13 00:00:01,000 - INFO - ✅ Canal Principal Confirmado: Nebula FTP (ID: -1001234567890)
+
 2025-12-13 00:00:02,000 - INFO - 🚀 Nebula FTP v2.3 Rodando na porta 2121
 
 
@@ -219,7 +219,6 @@ python accounts_manager.py
 python main.py
 ```
 
-
 ---
 
 ## 🍎 macOS
@@ -231,7 +230,6 @@ Se não tiver:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
-
 
 ### 2. Instalar Dependências
 
