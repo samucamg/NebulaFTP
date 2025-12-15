@@ -75,23 +75,38 @@ Funciona com Kodi, VLC, Emby, Plex
 
 ### Opção 1: Docker (Recomendado) 🐳
 
-1. Clone o repositório
+1. Aceder ao seu Servidor via SSH
+ ```
+ssh seu_usuario@IP_DO_SERVIDOR
+```
+2. Atualizar o Servidor
+```
+sudo apt update && sudo apt upgrade -y
+```
+3. Instalar as Ferramentas Essenciais
+
+```
+sudo apt install git python3 python3-venv python3-pip ffmpeg -y
+```
+
+4. Clone o repositório
  ```
 git clone https://github.com/samucamg/NebulaFTP.git
 cd NebulaFTP
  ```
-2. Configure o .env
+5. Configure o .env
  ```
 cp .env.example .env
 nano .env # Preencha seus dados
  ```
-3. Inicie!
-
+6. Inicie!
+```
 docker-compose up -d
-4. Veja os logs
-
+```
+7. Veja os logs
+```
 docker-compose logs -f nebulaftp
-
+```
 
 **📖 [Guia Completo Docker →](docs/DOCKER.md)**
 
