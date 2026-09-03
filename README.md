@@ -364,3 +364,4 @@ Aprenda aqui, [Como Criar gratuitamente sua base de dados Mongo DB] (https://www
 
 </details>
 <summary>Aconselho a utilização de Uma VPS ou windows com wsl2 com <b>Ubuntu 22.04</b></summary>
+# teste
