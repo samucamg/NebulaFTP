@@ -12,6 +12,8 @@
 
 ---
 
+[🇧🇷 Português](#) | [🇺🇸 English](ECOSYSTEM-en.md)
+
 ## 📖 Índice
 
 - [Visão Geral](#-visão-geral)

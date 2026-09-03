@@ -6,6 +6,8 @@
 
 ---
 
+[🇧🇷 Português](#) | [🇺🇸 English](DOCKER-en.md)
+
 # 🚀 Guia de Instalação: NebulaFTP Community (Docker)
 
 Bem-vindo ao **NebulaFTP Community Edition**! Este guia ensina como colocar o servidor

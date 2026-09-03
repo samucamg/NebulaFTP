@@ -1,3 +1,5 @@
+[🇧🇷 Português](#) | [🇺🇸 English](TELEGRAM_SETUP-en.md)
+
 # 📱 Configuração do Telegram
 
 Este guia ensina como criar e configurar tudo que você precisa no Telegram para usar o Nebula FTP.
