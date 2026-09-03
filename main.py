@@ -15,6 +15,9 @@ from pyrogram.errors import FloodWait, RPCError
 
 # Imports locais
 from ftp import Server, MongoDBUserManager, MongoDBPathIO
+import aiosqlite
+import json
+from ftp.sqlite_db import SQLiteUserManager, SQLitePathIO
 from ftp.common import UPLOAD_QUEUE
 from ftp.sftp import start_sftp_server
 from ftp.pathio import PathIONursery
@@ -83,6 +86,47 @@ async def setup_database_indexes(mongo):
         logger.info("✅ Índices verificados.")
     except Exception as e: logger.warning(f"⚠️ Aviso índices: {e}")
 
+async def setup_sqlite_tables(db_path):
+    logger.info("🔧 Verificando tabelas SQLite...")
+    try:
+        async with aiosqlite.connect(db_path) as db:
+            await db.execute('''CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                login TEXT UNIQUE,
+                password TEXT,
+                permissions TEXT
+            )''')
+            await db.execute('''CREATE TABLE IF NOT EXISTS files (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type TEXT,
+                name TEXT,
+                parent TEXT,
+                size INTEGER,
+                status TEXT,
+                local_path TEXT,
+                mtime INTEGER,
+                ctime INTEGER,
+                parts TEXT
+            )''')
+            await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_name ON files(parent, name)')
+            await db.execute('CREATE INDEX IF NOT EXISTS idx_parent ON files(parent)')
+            await db.commit()
+
+            # Create a default user if none exists
+            async with db.execute("SELECT COUNT(*) FROM users") as cursor:
+                row = await cursor.fetchone()
+                if row[0] == 0:
+                    default_perms = json.dumps([{"path": "/", "readable": True, "writable": True}])
+                    await db.execute(
+                        "INSERT INTO users (login, password, permissions) VALUES (?, ?, ?)",
+                        ("admin", "admin", default_perms)
+                    )
+                    await db.commit()
+                    logger.info("✅ Usuário padrão (admin/admin) criado no SQLite.")
+
+        logger.info("✅ Tabelas SQLite verificadas.")
+    except Exception as e: logger.warning(f"⚠️ Aviso tabelas SQLite: {e}")
+
 async def garbage_collector():
     logger.info(f"🧹 Garbage Collector Iniciado (Max Age: {MAX_STAGING_AGE}s)")
     staging_dir = "staging"
@@ -110,7 +154,7 @@ async def garbage_collector():
         except Exception as e: logger.error(f"❌ GC Falha Geral: {e}")
         await asyncio.sleep(600)
 
-async def folder_watcher(mongo):
+async def folder_watcher(db_wrapper):
     """
     Vigia a pasta 'staging' RECURSIVAMENTE.
     Mapeia arquivos para a PASTA DO UTILIZADOR.
@@ -121,7 +165,7 @@ async def folder_watcher(mongo):
 
     target_root = "/"
     try:
-        user = await mongo.users.find_one({})
+        user = await db_wrapper.get_user()
         if user:
             target_root = f"/{user['login']}"
             logger.info(f"🎯 Modo MonoBot: Arquivos de staging irão para: {target_root}")
@@ -154,7 +198,7 @@ async def folder_watcher(mongo):
                         if target_root == "/": parent_path = f"/{normalized_rel}"
                         else: parent_path = f"{target_root}/{normalized_rel}"
 
-                    doc = await mongo.files.find_one({"name": f, "parent": parent_path})
+                    doc = await db_wrapper.find_file(f, parent_path)
 
                     if not doc:
                         await asyncio.sleep(2)
@@ -166,11 +210,19 @@ async def folder_watcher(mongo):
                             parts = parent_path.strip("/").split("/")
                             current_parent = "/"
                             for part in parts:
-                                await mongo.files.update_one(
-                                    {"name": part, "parent": current_parent},
-                                    {"$setOnInsert": {"type": "dir", "ctime": int(time.time()), "mtime": int(time.time()), "size": 0}},
-                                    upsert=True
-                                )
+                                if db_wrapper.db_type == "mongodb":
+                                    await db_wrapper.db_client.files.update_one(
+                                        {"name": part, "parent": current_parent},
+                                        {"$setOnInsert": {"type": "dir", "ctime": int(time.time()), "mtime": int(time.time()), "size": 0}},
+                                        upsert=True
+                                    )
+                                else:
+                                    import aiosqlite
+                                    async with aiosqlite.connect(db_wrapper.db_path) as conn:
+                                        async with conn.execute("SELECT id FROM files WHERE name = ? AND parent = ?", (part, current_parent)) as cursor:
+                                            if not await cursor.fetchone():
+                                                await conn.execute("INSERT INTO files (type, name, parent, size, status, mtime, ctime, parts) VALUES (?, ?, ?, ?, ?, ?, ?, '[]')", ("dir", part, current_parent, 0, "active", int(time.time()), int(time.time())))
+                                                await conn.commit()
                                 if current_parent == "/": current_parent = "/" + part
                                 else: current_parent = f"{current_parent}/{part}"
 
@@ -181,7 +233,13 @@ async def folder_watcher(mongo):
                         }
 
                         try:
-                            await mongo.files.insert_one(file_doc)
+                            if db_wrapper.db_type == "mongodb":
+                                await db_wrapper.db_client.files.insert_one(file_doc)
+                            else:
+                                import aiosqlite, json
+                                async with aiosqlite.connect(db_wrapper.db_path) as conn:
+                                    await conn.execute("INSERT INTO files (type, name, parent, size, status, local_path, mtime, ctime, parts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_doc["type"], file_doc["name"], file_doc["parent"], file_doc["size"], file_doc["status"], file_doc["local_path"], file_doc["mtime"], file_doc["ctime"], json.dumps([])))
+                                    await conn.commit()
                             await UPLOAD_QUEUE.put({
                                 "path": fp, "filename": f, "parent": parent_path, "size": size_t1
                             })
@@ -194,7 +252,54 @@ async def folder_watcher(mongo):
 
         await asyncio.sleep(5)
 
-async def upload_worker(bot, target_chat_id, mongo, worker_id):
+class DBWrapper:
+    def __init__(self, db_type, db_client=None, db_path=None):
+        self.db_type = db_type
+        self.db_client = db_client
+        self.db_path = db_path
+
+    async def get_user(self):
+        if self.db_type == 'mongodb':
+            return await self.db_client.users.find_one({})
+        else:
+            async with aiosqlite.connect(self.db_path) as db:
+                db.row_factory = aiosqlite.Row
+                async with db.execute("SELECT * FROM users LIMIT 1") as cursor:
+                    row = await cursor.fetchone()
+                    return dict(row) if row else None
+
+    async def find_file(self, filename, parent):
+        if self.db_type == 'mongodb':
+            return await self.db_client.files.find_one({"name": filename, "parent": parent})
+        else:
+            async with aiosqlite.connect(self.db_path) as db:
+                db.row_factory = aiosqlite.Row
+                async with db.execute("SELECT * FROM files WHERE name = ? AND parent = ?", (filename, parent)) as cursor:
+                    row = await cursor.fetchone()
+                    if row:
+                        d = dict(row)
+                        d["_id"] = d["id"] # Mock _id for compatibility
+                        return d
+                    return None
+
+    async def update_file(self, file_id, real_size, parts_metadata, file_uuid):
+        now = int(time.time())
+        if self.db_type == 'mongodb':
+            await self.db_client.files.update_one(
+                {"_id": file_id},
+                {"$set": {"size": real_size, "uploaded_at": now, "parts": parts_metadata, "obfuscated_id": file_uuid, "status": "completed"}, "$unset": {"uploadId": 1, "local_path": 1}}
+            )
+        else:
+            async with aiosqlite.connect(self.db_path) as db:
+                parts_json = json.dumps(parts_metadata)
+                await db.execute(
+                    "UPDATE files SET size = ?, mtime = ?, parts = ?, status = 'completed', local_path = '' WHERE id = ?",
+                    (real_size, now, parts_json, file_id)
+                )
+                await db.commit()
+
+
+async def upload_worker(bot, target_chat_id, db_wrapper, worker_id):
     logger.info(f"👷 Worker #{worker_id} Pronto")
 
     while True:
@@ -220,7 +325,7 @@ async def upload_worker(bot, target_chat_id, mongo, worker_id):
 
             logger.info(f"⬆️ [W{worker_id}] Processando: {filename} ({real_size/1024/1024:.2f} MB)")
 
-            file_doc = await mongo.files.find_one({"name": filename, "parent": parent})
+            file_doc = await db_wrapper.find_file(filename, parent)
             if not file_doc:
                 logger.warning(f"⚠️ [W{worker_id}] Metadados não encontrados: {filename}")
                 continue
@@ -273,10 +378,7 @@ async def upload_worker(bot, target_chat_id, mongo, worker_id):
                 logger.error(f"❌ [W{worker_id}] Abortado: {filename}: {e}"); upload_failed = True; Metrics.log_fail()
 
             if not upload_failed:
-                await mongo.files.update_one(
-                    {"_id": file_doc["_id"]},
-                    {"$set": {"size": real_size, "uploaded_at": int(time.time()), "parts": parts_metadata, "obfuscated_id": file_uuid, "status": "completed"}, "$unset": {"uploadId": 1, "local_path": 1}}
-                )
+                await db_wrapper.update_file(file_doc["_id"], real_size, parts_metadata, file_uuid)
                 logger.info(f"✅ [W{worker_id}] Concluído: {filename}")
                 Metrics.log_success(real_size)
                 # Agora sim o GC ou nós mesmos podemos remover
@@ -328,21 +430,38 @@ async def main():
     if not target_chat_id: await bot.stop(); return
 
     loop = asyncio.get_event_loop()
-    try:
-        mongo = AsyncIOMotorClient(environ.get("MONGODB"), io_loop=loop, w="majority").ftp
-        await setup_database_indexes(mongo)
-    except Exception as e: logger.critical(f"❌ Erro DB: {e}"); return
 
-    MongoDBPathIO.db = mongo; MongoDBPathIO.tg = bot
-    user_manager = MongoDBUserManager(mongo)
-    server = Server(user_manager, MongoDBPathIO)
-    path_io_nursery = PathIONursery(MongoDBPathIO)
+    db_type = environ.get("DB_TYPE", "sqlite").lower()
+    mongo = None
+    if db_type == "mongodb":
+        try:
+            mongo = AsyncIOMotorClient(environ.get("MONGODB"), io_loop=loop, w="majority").ftp
+            await setup_database_indexes(mongo)
+            db_wrapper = DBWrapper("mongodb", db_client=mongo)
+            MongoDBPathIO.db = mongo; MongoDBPathIO.tg = bot
+            user_manager = MongoDBUserManager(mongo)
+            path_io_class = MongoDBPathIO
+        except Exception as e:
+            logger.critical(f"❌ Erro MongoDB DB: {e}"); return
+    else:
+        db_path = environ.get("DB_FILE", "nebula.db")
+        try:
+            await setup_sqlite_tables(db_path)
+            db_wrapper = DBWrapper("sqlite", db_path=db_path)
+            SQLitePathIO.db_path = db_path; SQLitePathIO.tg = bot
+            user_manager = SQLiteUserManager(db_path)
+            path_io_class = SQLitePathIO
+        except Exception as e:
+            logger.critical(f"❌ Erro SQLite DB: {e}"); return
+
+    server = Server(user_manager, path_io_class)
+    path_io_nursery = PathIONursery(path_io_class)
 
     asyncio.create_task(garbage_collector())
     asyncio.create_task(stats_reporter())
-    asyncio.create_task(folder_watcher(mongo))
+    asyncio.create_task(folder_watcher(db_wrapper))
 
-    for i in range(MAX_WORKERS): asyncio.create_task(upload_worker(bot, target_chat_id, mongo, i+1))
+    for i in range(MAX_WORKERS): asyncio.create_task(upload_worker(bot, target_chat_id, db_wrapper, i+1))
 
     host = environ.get("HOST", "0.0.0.0")
     ftp_port = int(environ.get("PORT", 2121))
@@ -356,7 +475,10 @@ async def main():
     sftp_server_task = asyncio.create_task(start_sftp_server(user_manager, path_io_nursery, host, sftp_port))
 
     logger.info(f"🚀 Iniciando Painel Web na porta {web_port}")
-    web_runner = await start_web_server(mongo, web_port)
+    if db_type == "mongodb":
+        web_runner = await start_web_server(mongo, web_port, "mongodb")
+    else:
+        web_runner = await start_web_server(db_path, web_port, "sqlite")
 
     stop_event = asyncio.Event()
     if os.name == "posix":

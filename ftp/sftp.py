@@ -15,11 +15,40 @@ class NebulaSFTPFile:
         self._path_io = path_io
 
     async def read(self, size: int = -1, offset: int = 0) -> bytes:
+        if hasattr(self._file, 'seek'):
+            res = self._file.seek(offset)
+            if asyncio.iscoroutine(res):
+                await res
+
         if hasattr(self._file, 'read'):
             res = self._file.read(size if size > 0 else -1)
             if asyncio.iscoroutine(res):
                 return await res
             return res
+
+        if hasattr(self._file, 'iter_by_block'):
+            read_size = size if size > 0 else (1024 * 1024)
+            chunks = []
+            total_read = 0
+
+            async for chunk in self._file.iter_by_block(read_size):
+                if not chunk:
+                    break
+
+                needed = size - total_read if size > 0 else len(chunk)
+                if len(chunk) > needed:
+                    chunks.append(chunk[:needed])
+                    total_read += needed
+                    break
+                else:
+                    chunks.append(chunk)
+                    total_read += len(chunk)
+
+                if size > 0 and total_read >= size:
+                    break
+
+            return b"".join(chunks)
+
         raise NotImplementedError("Download streaming via SFTP is not natively supported by this architecture yet. Use the Web UI/NebulaStream for downloads.")
 
     async def write(self, data: bytes, offset: int = 0) -> int:
