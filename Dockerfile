@@ -19,8 +19,10 @@ COPY . .
 # Cria a pasta staging
 RUN mkdir -p staging
 
-# Expõe as portas (FTP e Passivas)
+# Expõe as portas (FTP, SFTP, Web e Passivas)
 EXPOSE 2121
+EXPOSE 2222
+EXPOSE 8080
 EXPOSE 60000-60100
 
 # Comando para iniciar

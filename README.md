@@ -354,13 +354,11 @@ A seguir:
   3. Crie um banco de dados Mongo DB com o nome de ftp [MongoDB Cloud](https://cloud.mongodb.com/) (ou use seu servidor) e copie a string de conexão.
 Aprenda aqui, [Como Criar gratuitamente sua base de dados Mongo DB] (https://www.youtube.com/watch?v=6b3YH0kK3ig)
   Caso pretenda utilizar uma quantidade muito grande de arquivos, é preferível criar o seu próprio banco de dados Mongo-db veja o tutorial sobre [Como instalar e Criar sua base de dados Mongo DB no ubuntu 20.04] (https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-20-04-pt)
-  4. Coloque todas as variáveis em na raiz do bot no arquivo .env
-  5. Adicione o bot ao seu canal com direito de administrador.
-  6. Execute o arquivo 'python3 get_channel_id.py`, envie o comando `/id` no seu canal para obter o id do canal.
-  7. Copie o ID para .env
-  8. Execute 'python3 setup_database.py`.
-  9. Execute 'python3 accounts_manager.py` para criar sua conta ftp.
-  10. Execute `main.py`.
+  4. Adicione o bot ao seu canal com direito de administrador e descubra o Chat ID do mesmo.
+  5. Execute `python3 setup.py` para gerar o arquivo `.env` interativamente através do console com suas configurações e chaves.
+  6. Execute 'python3 setup_database.py` se necessário.
+  7. Execute `python3 main.py` e acesse o painel web (por padrão na porta 8080) para criar sua conta ftp e/ou sftp.
+  8. Conecte-se com seu cliente de preferência (FTP pela porta 2121 ou SFTP pela porta 2222).
 
 </details>
 <summary>Aconselho a utilização de Uma VPS ou windows com wsl2 com <b>Ubuntu 22.04</b></summary>
