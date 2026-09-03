@@ -4,7 +4,6 @@ from functools import wraps
 from io import BytesIO
 from os import environ
 from pathlib import PurePosixPath
-from sys import exc_info
 from time import time
 from uuid import uuid4
 import os
@@ -33,7 +32,7 @@ def universal_exception(coro):
         except (CancelledError, NotImplementedError, StopAsyncIteration):
             raise
         except Exception as exc:
-            raise PathIOError(reason=exc_info()) from exc
+            raise PathIOError(reason=exc) from exc
     return wrapper
 
 class PathIONursery:
