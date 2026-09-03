@@ -1,6 +1,6 @@
 pyftpdlib
-motor==2.5.1
-pymongo==3.12.3
+motor
+pymongo
 dnspython
 asyncio
 aiofiles
@@ -9,3 +9,7 @@ tgcrypto
 dnspython
 python-dotenv
 requests
+asyncssh
+aiohttp
+aiohttp-jinja2
+jinja2

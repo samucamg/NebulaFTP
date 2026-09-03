@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nebula FTP - Add User</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="password"] { width: 300px; padding: 8px; }
+        .btn { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        a { text-decoration: none; color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Add New User</h1>
+    <form method="POST" action="/add">
+        <div class="form-group">
+            <label>Login:</label>
+            <input type="text" name="login" required pattern="[a-zA-Z0-9_]{1,64}">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Add User</button>
+        <a href="/" style="margin-left: 10px;">Cancel</a>
+    </form>
+</body>
+</html>

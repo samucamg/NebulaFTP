@@ -16,3 +16,5 @@ __all__ = [
     "UPLOAD_QUEUE",
     "PathIOError"
 ]
+from .sftp import start_sftp_server
+__all__.append("start_sftp_server")

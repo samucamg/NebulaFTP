@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nebula FTP - Edit User</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; max-width: 600px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .btn { padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background: #dc3545; }
+        a { text-decoration: none; color: blue; display: inline-block; margin-bottom: 20px;}
+    </style>
+</head>
+<body>
+    <a href="/">&larr; Back to Users</a>
+    <h1>Edit User: {{ user.login }}</h1>
+
+    <div class="section">
+        <h3>Change Password</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="change_pass">
+            <input type="password" name="password" required placeholder="New Password" style="padding: 5px;">
+            <button type="submit" class="btn">Update Password</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Permissions</h3>
+        <table>
+            <tr>
+                <th>Path</th>
+                <th>Readable</th>
+                <th>Writable</th>
+                <th>Action</th>
+            </tr>
+            {% for perm in user.permissions %}
+            <tr>
+                <td>{{ perm.path }}</td>
+                <td>{{ perm.readable }}</td>
+                <td>{{ perm.writable }}</td>
+                <td>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="del_perm">
+                        <input type="hidden" name="path" value="{{ perm.path }}">
+                        <button type="submit" class="btn btn-danger" style="padding: 4px 8px;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No explicit permissions configured. Base directory access applies.</td></tr>
+            {% endfor %}
+        </table>
+
+        <h4 style="margin-top: 20px;">Add Permission</h4>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_perm">
+            <input type="text" name="path" required placeholder="/path/to/folder" style="padding: 5px; width: 200px;">
+            <label><input type="checkbox" name="readable"> Read</label>
+            <label><input type="checkbox" name="writable"> Write</label>
+            <button type="submit" class="btn">Add</button>
+        </form>
+    </div>
+</body>
+</html>
