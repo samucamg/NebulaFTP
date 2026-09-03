@@ -1,32 +1,35 @@
+# ============================================================
+# Nebula FTP — Docker Compose (Community)
+#
+# Uso:
+#   cp .env.example .env            # preencha API_ID, API_HASH, BOT_TOKENS, CHAT_ID...
+#   mkdir -p staging                # cria os arquivos de persistência (1ª vez)
+#   touch nebula.db nebula.log sftp_host_key Nebula_MonoBot.session
+#   docker compose up -d
+#   docker compose logs -f nebulaftp
+#
+# Obs.: usa REDE HOST (Linux). As portas usadas são as do .env
+# (FTP 2121, SFTP 2222, painel Web 8080). Em Docker Desktop
+# (Windows/macOS) não há suporte a rede host — prefira Python nativo.
+# ============================================================
+
 services:
-  app:
+  nebulaftp:
     build: .
-    container_name: nebula_ftp
+    container_name: nebulaftp
     restart: unless-stopped
-    # MÁGICA AQUI: Usamos a rede do host. O container age como um processo normal na VPS.
-    # Sem problemas de NAT, sem problemas de portas passivas.
+
+    # Rede host: o container escuta nas interfaces da própria máquina.
+    # Evita problemas de NAT/portas passivas (PASV/EPSV) do FTP.
     network_mode: host
+
+    env_file:
+      - .env
+
     volumes:
-      - ./staging:/app/staging
-      - ./FTP_Bot.session:/app/FTP_Bot.session
-      - ./nebula.log:/app/nebula.log
-      - ./.env:/app/.env
-    environment:
-      # Como estamos no modo host, o container vê o mongo na porta local
-      - MONGODB=mongodb://127.0.0.1:27017
-    depends_on:
-      - mongo
-
-  mongo:
-    image: mongo:4.4
-    container_name: nebula_mongo
-    restart: unless-stopped
-    ports:
-      # Expomos o mongo para o 'localhost' da VPS para o app conseguir conectar
-      - "127.0.0.1:27017:27017"
-    volumes:
-      - mongo_data:/data/db
-
-volumes:
-  mongo_data:
-
+      # --- Persistência (não remover, senão perde metadados/sessão) ---
+      - ./staging:/app/staging                               # Cache de upload (Upload Turbo)
+      - ./nebula.db:/app/nebula.db                           # Metadados (SQLite - padrão)
+      - ./nebula.log:/app/nebula.log                         # Logs
+      - ./Nebula_MonoBot.session:/app/Nebula_MonoBot.session # Sessão do bot (evita re-login)
+      - ./sftp_host_key:/app/sftp_host_key                   # Chave de host do SFTP

@@ -1,0 +1,39 @@
+# ============================================================
+# Nebula FTP — STACK para PORTAINER (Community)
+#
+# Como usar:
+#   1) No HOST (Linux), clone e prepare o repositório:
+#        git clone https://github.com/samucamg/NebulaFTP.git /opt/NebulaFTP
+#        cd /opt/NebulaFTP
+#        cp .env.example .env                 # edite API_ID, API_HASH, BOT_TOKENS, CHAT_ID...
+#        mkdir -p staging
+#        touch nebula.db nebula.log sftp_host_key Nebula_MonoBot.session
+#        docker compose build                 # ou: docker build -t nebulaftp .
+#
+#   2) No Portainer: Stacks -> Add stack -> Web editor -> cole este
+#      arquivo. Ajuste "/opt/NebulaFTP" se clonou em outro caminho.
+#
+# Obs.: usa REDE HOST (Linux) — as portas são as do .env
+# (FTP 2121, SFTP 2222, painel Web 8080). Em Docker Desktop
+# (Windows/macOS) prefira rodar com Python nativo.
+# ============================================================
+
+services:
+  nebulaftp:
+    image: nebulaftp:latest
+    container_name: nebulaftp
+    restart: unless-stopped
+
+    # Rede host: evita problemas de PASV/EPSV do FTP em VPS.
+    network_mode: host
+
+    env_file:
+      - /opt/NebulaFTP/.env
+
+    volumes:
+      # --- Persistência (não remover, senão perde metadados/sessão) ---
+      - /opt/NebulaFTP/staging:/app/staging                               # Cache de upload (Upload Turbo)
+      - /opt/NebulaFTP/nebula.db:/app/nebula.db                           # Metadados (SQLite - padrão)
+      - /opt/NebulaFTP/nebula.log:/app/nebula.log                         # Logs
+      - /opt/NebulaFTP/Nebula_MonoBot.session:/app/Nebula_MonoBot.session # Sessão do bot (evita re-login)
+      - /opt/NebulaFTP/sftp_host_key:/app/sftp_host_key                   # Chave de host do SFTP

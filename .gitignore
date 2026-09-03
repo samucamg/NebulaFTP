@@ -2,3 +2,9 @@
 __pycache__
 *.session*
 *_test.py
+
+# Artefatos de runtime
+staging/
+nebula.db
+nebula.log
+sftp_host_key

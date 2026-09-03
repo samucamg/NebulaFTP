@@ -2,336 +2,391 @@
 
 <img src="https://raw.githubusercontent.com/samucamg/NebulaFTP/refs/heads/master/img/logo_nebula_ftp.png" alt="Logo Nebula FTP" width="300px">
 
-### **Transforme o Telegram em seu Armazenamento Ilimitado**
+### **Transforme o Telegram em seu Armazenamento Ilimitado via FTP/SFTP**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/samucamg/NebulaFTP/pulls)
 
-[🇧🇷 Português](#) | [🇺🇸 English](README-en.md)
-
-[📖 Documentação](#-documentação) • [🚀 Início Rápido](#-início-rápido) • [🎥 Vídeo](#-vídeo-tutorial) • [💬 Suporte](#-suporte)
+**Servidor FTP + SFTP** com painel web de administração, usando o **Telegram como backend de armazenamento**.
 
 </div>
 
 ---
 
-## 🎯 O que é o Nebula FTP?
+## 📌 O que é o Nebula FTP?
 
-**Nebula FTP** é um servidor FTP profissional que usa o **Telegram como backend de armazenamento**, oferecendo:
+O **Nebula FTP** transforma qualquer canal do Telegram em um "disco" acessível por protocolos padrão de arquivo.
+Você continua usando seus clientes de sempre (FileZilla, WinSCP, RaiDrive, rclone, WinSCP/SFTP...) e o sistema
+cuida de **fragmentar, enviar e indexar** cada arquivo no Telegram.
 
-- ✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)
-- ⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta) **(Velocidade Máxima com Multi-Bot)**
-- 🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)
-- 🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo **(Disponível via SFTP!)**
-- 🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente, aumentando a performance. **(Apenas na Versão Pro)**
-- 👥 **Multi-Usuário** - Sistema completo de permissões por pasta. 
-- 🐳 **Docker Ready** - Instalação em 1 comando
-- 🛡️ **Production-Grade** - Retry logic, logs, métricas e graceful shutdown
+### ✨ Funcionalidades atuais
 
----
+- **📡 Servidor FTP** — porta `2121` (padrão), servidor assíncrono próprio com suporte a PASV/EPSV,
+  listagem, upload, download, renomear, mover, excluir, criar pastas e **retomada de download (REST)**.
+- **🔐 Servidor SFTP (SSH)** — porta `2222` (padrão), com os **mesmos usuários e permissões do FTP**
+  (chave de host gerada automaticamente em `sftp_host_key`).
+- **🖥️ Painel Web de administração** — porta `8080` (padrão): crie usuários, altere senhas e
+  gerencie **permissões por pasta** (leitura/escrita) sem tocar no banco.
+- **⚡ Upload Turbo (Staging)** — o upload cai primeiro no **disco local (instantâneo)** e vai para o
+  Telegram em **background**, sem timeouts no cliente.
+- **☁️ Download/Streaming por partes** — o arquivo é remontado a partir das partes (`part_NNN`)
+  já enviadas ao Telegram, mesmo que não exista mais cópia local. A leitura por offset (seek) via SFTP permite assistir mídia sem baixar o arquivo inteiro.
+- **🗄️ SQLite (padrão) ou MongoDB** — escolha pelo `.env` (`DB_TYPE`). Sem necessidade de instalar MongoDB
+  para começar.
+- **🛡️ Robusto** — retry com backoff (FloodWait/RPC), garbage collector do staging, logs rotativos,
+  métricas e graceful shutdown.
+- **👥 Multi-usuário** — home próprio por usuário (`/<login>`) e permissões por caminho.
+- **🤖 Multi-Bot** — distribui carga entre vários bots. **Apenas na versão Pro 💎**
+  (na Community, o primeiro token de `BOT_TOKENS` é utilizado).
 
-## 📊 Demonstração
-
-### Upload Turbo (Staging Local)
-Cliente FTP envia → Disco local (instantâneo) → Telegram (background)
-
-✅ Sem timeouts  
-✅ Sem travamentos  
-✅ Compatível com RaiDrive/Windows Explorer  **(Não funciona para streaming)**
-
-### Screenshots
-
-<details>
-<summary>📸 Clique para ver capturas de tela</summary>
-
-![FileZilla conectado](docs/images/screenshot_filezilla.png)
-*FileZilla transferindo 15GB de filmes*
-
-![RaiDrive montado](docs/images/screenshot_raidrive.png)
-*Drive Z: montado no Windows Explorer*
-
-</details>
+> 💎 **Community vs Pro:** esta é a versão **Community (open source)** — 1 bot e até ~10 MB/s.
+> A versão **Pro** traz Multi-Bot (4–8 bots, até 60 MB/s), canal de backup automático e suporte prioritário.
+> Veja a tabela completa no [ECOSYSTEM.md](docs/ECOSYSTEM.md).
 
 ---
 
-## 🎥 Vídeo Tutorial
+## 🏗️ Arquitetura
 
-> 🎬 **Em breve:** Tutorial completo de instalação e configuração
+```
+┌─────────────────────────────┐   ┌──────────────────────────┐   ┌──────────────────┐
+│  Cliente FTP (FileZilla,    │   │  Cliente SFTP (WinSCP,   │   │  Painel Web      │
+│  RaiDrive, rclone...)       │   │  sshfs, rclone...)       │   │  (porta 8080)    │
+└──────────────┬──────────────┘   └────────────┬─────────────┘   └────────┬─────────┘
+               │                               │                          │
+               └───────────────┬───────────────┘──────────────────────────┘
+                               ▼
+              ┌───────────────────────────────────┐
+              │      NEBULA FTP SERVER            │
+              │  ┌─────────────────────────────┐  │
+              │  │ Folder Watcher (staging)    │  │
+              │  │ Upload Workers (fila)       │  │
+              │  │ PathIO (monta/desmonta)     │  │
+              │  │ Garbage Collector           │  │
+              │  │ Permissões por usuário      │  │
+              │  └─────────────────────────────┘  │
+              └──────┬──────────────────┬─────────┘
+                     ▼                  ▼
+         ┌──────────────────┐  ┌──────────────────┐
+         │ SQLite (padrão)  │  │    Telegram      │
+         │ ou MongoDB       │  │ (canal: partes   │
+         │ (metadados)      │  │  UUID.part_NNN)  │
+         └──────────────────┘  └──────────────────┘
+```
 
-[![Nebula FTP Tutorial](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://youtube.com/watch?v=VIDEO_ID)
+**Fluxo de upload (Upload Turbo):** cliente FTP envia → arquivo gravado em `staging/` (instantâneo) →
+`folder_watcher` detecta e enfileira → workers fragmentam em chunks (`CHUNK_SIZE_MB`) e enviam ao canal →
+metadados (partes) são salvos no banco → cópia local é removida.
+
+**Fluxo de download:** o servidor lê os metadados das partes e **baixa do Telegram sob demanda**,
+entregando o arquivo ao cliente FTP/SFTP — não é preciso manter cópia local.
 
 ---
 
-## 🚀 Início Rápido
+## 📁 Requisitos
 
-### Opção 1: Docker (Recomendado) 🐳
+- 🐍 **Python 3.10+** (instalação nativa) ou 🐳 **Docker** (Linux/VPS recomendado).
+- 📱 **Telegram**: API ID/Hash ([my.telegram.org](https://my.telegram.org)), um **bot** ([@BotFather](https://t.me/BotFather)) e um **canal** com o bot como administrador.
+  [📖 Guia completo do Telegram →](docs/TELEGRAM_SETUP.md)
+- 🗄️ *(Opcional)* **MongoDB** local/Atlas — somente se quiser usar `DB_TYPE=mongodb`.
+  No padrão **SQLite** nada precisa ser instalado.
 
-1. Aceder ao seu Servidor via SSH
- ```
-ssh seu_usuario@IP_DO_SERVIDOR
-```
-2. Atualizar o Servidor
-```
-sudo apt update && sudo apt upgrade -y
-```
-3. Instalar as Ferramentas Essenciais
+---
 
-```
-sudo apt install git python3 python3-venv python3-pip ffmpeg -y
-```
+## 🚀 Instalação
 
-4. Clone o repositório
- ```
+### Opção 1 — Docker (recomendado para Linux/VPS) 🐳
+
+```bash
+# 1) Acesse o servidor e clone o repositório
 git clone https://github.com/samucamg/NebulaFTP.git
 cd NebulaFTP
- ```
-5. Configure o .env
- ```
+
+# 2) Configure o .env (API_ID, API_HASH, BOT_TOKENS, CHAT_ID...)
 cp .env.example .env
-nano .env # Preencha seus dados
- ```
-6. Inicie!
-```
-docker-compose up -d
-```
-7. Veja os logs
-```
-docker-compose logs -f nebulaftp
+nano .env
+
+# 3) Crie os arquivos de persistência (apenas na 1ª vez)
+mkdir -p staging
+touch nebula.db nebula.log sftp_host_key Nebula_MonoBot.session
+
+# 4) Suba
+docker compose up -d
+
+# 5) Acompanhe os logs
+docker compose logs -f nebulaftp
 ```
 
-**📖 [Guia Completo Docker →](docs/DOCKER.md)**
+> O `docker-compose.yml` usa **rede host** (funciona de forma transparente com FTP passivo em VPS).
+> Em **Windows/macOS com Docker Desktop** (sem suporte a rede host) prefira a **Opção 3 — Python nativo**.
 
----
+### Opção 2 — Portainer 🐳
 
-### Opção 2: Python Direto 🐍
+1. Clone o repositório no host: `git clone https://github.com/samucamg/NebulaFTP.git` (ex.: `/opt/NebulaFTP`).
+2. Crie o arquivo `.env` (`cp .env.example .env` e edite).
+3. Crie os arquivos de persistência (1ª vez):
+   `mkdir -p staging && touch nebula.db nebula.log sftp_host_key Nebula_MonoBot.session`
+4. Construa a imagem uma vez: `docker compose build` (ou `docker build -t nebulaftp .`).
+5. No **Portainer**: `Stacks → Add stack → Web editor` → cole o conteúdo do arquivo
+   [**`portainer-stack.yml`**](portainer-stack.yml) → ajuste os caminhos dos volumes
+   (padrão: `/opt/NebulaFTP`) → preencha as variáveis de ambiente → **Deploy the stack**.
 
-1. Clone e prepare ambiente
- ```
+### Opção 3 — Python direto 🐍
+
+```bash
+# 1) Clone e prepare o ambiente
 git clone https://github.com/samucamg/NebulaFTP.git
 cd NebulaFTP
 python3 -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
- ```
-2. Instale dependências
- ```
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# 2) Dependências
 pip install -r requirements.txt
- ```
-3. Configure
- ```
-cp .env.example .env
-nano .env
- ```
-4. Rode
- ```
+
+# 3) Configure — use o assistente interativo (recomendado)
+python setup.py
+# ...ou manualmente:
+cp .env.example .env && nano .env
+
+# 4) Rode
 python main.py
- ```
-
-**📖 [Guia Instalação Completa →](docs/INSTALLATION.md)**
-
----
-
-## 📖 Documentação
-
-### 🎓 Para Iniciantes
-
-1. **[📱 Configurar Telegram](docs/TELEGRAM_SETUP.md)**
-   - Obter API ID e API Hash
-   - Criar bots com @BotFather
-   - Criar canais e adicionar bots como admin
-
-2. **[💾 Instalação Python](docs/INSTALLATION.md)**
-   - Windows, Linux, macOS
-   - Passo a passo detalhado
-   - Solução de problemas
-
-3. **[🐳 Instalação Docker](docs/DOCKER.md)**
-   - Docker Desktop (Windows/Mac)
-   - Docker Engine (Linux)
-   - docker-compose explicado
-
-4. **[👥 Gerenciar Usuários](docs/USER_MANAGEMENT.md)**
-   - Criar contas FTP
-   - Permissões (leitura/escrita)
-   - Limitar acesso por pasta
-
----
-
-### 🏗️ Ecossistema Nebula
-
-O **Nebula FTP** faz parte de um ecossistema maior:
-
-| Projeto | Descrição | Status |
-|---------|-----------|--------|
-| **[NebulaFTP](docs/ECOSYSTEM.md#-nebulaftp)** | Servidor FTP com Telegram | ✅ **Você está aqui** |
-| **[NebulaStream](docs/ECOSYSTEM.md#-nebulastreaming)** | Interface Web + Player | 🚧 Em desenvolvimento |
-| **[NebulaWebDAV](docs/ECOSYSTEM.md#%EF%B8%8F-nebulawebdav)** | Servidor WebDAV para Kodi/Plex | 🚧 Em desenvolvimento |
-| **[NebulaSFTP](docs/ECOSYSTEM.md#-nebulasftp)** | Servidor SFTP (SSH) | 📋 Planejado |
-
-**📖 [Saiba mais sobre o Ecossistema →](docs/ECOSYSTEM.md)**
-
----
-
-
----
-
-## 🚀 Como montar como disco de rede (WebDAV) usando Rclone e SFTP
-
-Como o Nebula FTP agora tem suporte completo a **SFTP com Streaming de Vídeo**, você pode usar o `rclone` para montá-lo localmente ou via WebDAV:
-
-1. Instale o [Rclone](https://rclone.org/).
-2. Rode `rclone config`.
-3. Escolha `n` (New remote) e dê um nome, ex: `nebula`.
-4. Escolha `sftp` (SSH/SFTP).
-5. Em host digite `127.0.0.1` (ou o IP do seu servidor).
-6. Em port digite `2222` (ou a porta configurada no `SFTP_PORT`).
-7. Em user, digite o usuário criado (ex: `admin`).
-8. Pressione enter na senha e digite a sua senha (ou configure chave SSH se suportado).
-9. Aceite e salve.
-
-Para montar no seu sistema via WebDAV para acessar localmente ou na sua TV (Kodi, etc):
-```bash
-rclone serve webdav nebula: --addr :8080 --vfs-cache-mode writes
 ```
-Agora você pode acessar em `http://127.0.0.1:8080/` e reproduzir vídeos diretamente através da integração SFTP do Nebula!
+
+**📖 Guias detalhados:** [Instalação Python](docs/INSTALLATION.md) · [Docker](docs/DOCKER.md)
+
+---
+
+## 🔐 Primeiro acesso e usuários
+
+- Com o backend **SQLite** (padrão), o sistema cria automaticamente o usuário
+  **`admin` / `admin`** na primeira execução. **⚠️ Troque a senha** pelo painel web!
+- Com o backend **MongoDB**, não há usuário padrão: crie o primeiro pelo painel web.
+- Abra o **painel web** em `http://IP_DO_SERVIDOR:8080` e gerencie os usuários:
+  - Criar usuário, alterar senha, excluir;
+  - Adicionar permissões por pasta (`readable` / `writable`);
+  - Cada usuário tem acesso total ao próprio home `/<login>` — pastas fora dele só com permissão explícita.
+- Opcionalmente proteja o painel definindo `WEB_ADMIN_PASSWORD` no `.env` (Basic Auth).
 
 ---
 
 ## ⚙️ Configuração (.env)
 
-API do Telegram (obtenha em my.telegram.org)
- ```
-API_ID=12345678
-API_HASH=abc123def456...
-Tokens dos Bots (crie com @BotFather)
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `API_ID` / `API_HASH` | — | Credenciais de [my.telegram.org](https://my.telegram.org) |
+| `BOT_TOKENS` | — | Token(s) do(s) bot(s), separados por vírgula *(Community usa o 1º; Multi-Bot = Pro 💎)* |
+| `CHAT_ID` | — | ID do canal onde os arquivos são salvos (formato `-100...`) |
+| `DB_TYPE` | `sqlite` | Banco de metadados: `sqlite` ou `mongodb` |
+| `DB_FILE` | `nebula.db` | Arquivo do SQLite (quando `DB_TYPE=sqlite`) |
+| `MONGODB` | — | URI do MongoDB (quando `DB_TYPE=mongodb`) |
+| `HOST` | `0.0.0.0` | Interface do servidor (veja dica de PASV abaixo) |
+| `PORT` | `2121` | Porta do **FTP** |
+| `SFTP_PORT` | `2222` | Porta do **SFTP/SSH** |
+| `WEB_PORT` | `8080` | Porta do **painel web** |
+| `WEB_ADMIN_PASSWORD` | *(vazio)* | Senha para proteger o painel web (opcional) |
+| `MAX_WORKERS` | `4` | Uploads simultâneos (workers) |
+| `CHUNK_SIZE_MB` | `64` | Tamanho de cada parte enviada ao Telegram |
+| `MAX_RETRIES` | `5` | Tentativas por parte em caso de erro |
+| `MAX_STAGING_AGE` | `3600` | Idade máxima (s) de arquivos órfãos em `staging/` antes do GC apagar |
+| `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 
-BOT_TOKENS=1234567890:AABBcc...,9876543210:AAFFdd...
-IDs dos Canais (copie de @userinfobot)
+> 💡 **Dica PASV/EPSV:** com `HOST=0.0.0.0` clientes que usam **EPSV** funcionam normalmente.
+> Se o cliente insistir em **PASV** e vier de outra máquina, defina `HOST` com o IP (LAN ou público)
+> da interface do servidor para que o endereço anunciado seja alcançável.
 
-CHAT_ID=-1001234567890
-BACKUP_CHAT_ID=-1009876543210 # Opcional
-Database (SQLite como Padrão)
-
-DB_TYPE=sqlite
-DB_FILE=nebula.db
-
-Para usar MongoDB:
-DB_TYPE=mongodb
-MONGODB=mongodb://localhost:27017
-
-Servidor FTP e SFTP
-
-HOST=0.0.0.0
-PORT=2121
-Performance
-
-MAX_WORKERS=4 # Workers de upload
-CHUNK_SIZE_MB=64 # Tamanho dos chunks
-MAX_RETRIES=5 # Tentativas de retry
-Logging
-
-LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR
-
- ```
-
-**📖 [Configuração Avançada →](docs/INSTALLATION.md#configuração-avançada)**
+Modelo completo com comentários: [`.env.example`](.env.example).
 
 ---
 
-## 🎯 Casos de Uso
+## 📁 Montando como unidade de disco / WebDAV (rclone e RaiDrive)
 
-### 🏠 Uso Pessoal
-- Backup automático de fotos/vídeos
-- Biblioteca de filmes/séries pessoal
-- Sincronização entre dispositivos
+O Nebula FTP é um servidor FTP/SFTP padrão — portanto pode ser montado como **unidade de rede**
+por ferramentas comuns. Dois jeitos fáceis:
 
-### 🏢 Uso Profissional
-- Servidor de arquivos para equipe pequena
-- Backup de projetos e documentos
-- Streaming de conteúdo educacional
+| Objetivo | Ferramenta |
+|---|---|
+| Windows — unidade com letra (Z:, Y:...) | **RaiDrive** (protocolo FTP) |
+| Linux — pasta montada ou WebDAV para outros apps | **rclone** (mount + `serve webdav`) |
+| Windows/Linux — alternativa via linha de comando | **rclone** |
 
-### 🎓 Educacional
-- Distribuição de materiais didáticos
-- Repositório de aulas gravadas
-- Compartilhamento de e-books
+> Use as credenciais de um usuário criado no painel web. No padrão SQLite, o usuário inicial é
+> `admin/admin` (troque a senha depois!). A pasta inicial do usuário é `/<login>`.
+
+### 🪟 Windows — RaiDrive (recomendado)
+
+1. Baixe e instale o [RaiDrive](https://www.raidrive.com/) (versão gratuita suporta FTP).
+2. Abra o RaiDrive → **Add** → escolha o grupo **FTP** → **FTP**.
+3. Preencha:
+   - **Address:** `IP_DO_SERVIDOR`
+   - **Port:** `2121`
+   - **Username / Password:** usuário criado no painel web (ex.: `admin`)
+4. Em **Drive**, escolha a letra (ex.: `Z:`) → **Connect**.
+5. Pronto: o "disco" aparece no **Windows Explorer** com seus arquivos do Telegram.
+
+> Se o Explorer travar em listagens/downloads, verifique no Firewall do Windows as portas
+> `2121` (e `2222`/`8080` se for usar SFTP/painel) e prefira conexão local/VPN.
+
+### 🐧 Linux — rclone (mount e WebDAV)
+
+Instale o rclone e o FUSE:
+
+```bash
+sudo apt update && sudo apt install -y rclone fuse3
+```
+
+Configure o remote (resposta interativa):
+
+```bash
+rclone config
+# n) Novo remote
+# name> nebula
+# type> ftp
+# host> IP_DO_SERVIDOR
+# user> admin
+# pass> SUA_SENHA
+# port> 2121
+```
+
+Ou edite manualmente `~/.config/rclone/rclone.conf`:
+
+```ini
+[nebula]
+type = ftp
+host = IP_DO_SERVIDOR
+user = admin
+pass = COLOQUE_AQUI_O_OUTPUT_DE:  rclone obscure "SUA_SENHA"
+port = 2121
+```
+
+Teste e monte como pasta:
+
+```bash
+rclone lsd nebula:              # lista as pastas
+mkdir -p ~/NebulaFTP
+rclone mount nebula: ~/NebulaFTP --vfs-cache-mode writes &
+# para desmontar: fusermount -u ~/NebulaFTP
+```
+
+**Transformar em WebDAV** (para Windows "Mapear unidade de rede", Kodi, Jellyfin, etc.):
+
+```bash
+rclone serve webdav nebula: --addr :8082 --user admin --pass SUA_SENHA
+# Endpoint WebDAV: http://IP_DO_SERVIDOR:8082
+```
+
+### 🐧 Linux — rclone via SFTP (recomendado para streaming)
+
+O servidor SFTP do Nebula (porta `2222`) suporta **leitura por partes (seek)** — para
+**reproduzir vídeos** direto do "disco"/WebDAV, prefira o remote por SFTP:
+
+```ini
+[nebula-sftp]
+type = sftp
+host = IP_DO_SERVIDOR
+user = admin
+pass = COLOQUE_AQUI_O_OUTPUT_DE:  rclone obscure "SUA_SENHA"
+port = 2222
+```
+
+```bash
+rclone lsd nebula-sftp:              # testa a conexão
+mkdir -p ~/NebulaFTP
+rclone mount nebula-sftp: ~/NebulaFTP --vfs-cache-mode writes &
+
+# Expor como WebDAV (Kodi, Plex, Windows "Mapear unidade"):
+rclone serve webdav nebula-sftp: --addr :8082 --user admin --pass SUA_SENHA
+```
+
+### 🪟 Windows — rclone (alternativa)
+
+```powershell
+winget install Rclone.Rclone
+rclone config                       # mesmo remote "nebula" (type = ftp)
+rclone mount nebula: N: --vfs-cache-mode writes
+# ou exponha WebDAV na rede local:
+rclone serve webdav nebula: --addr :8082 --user admin --pass SUA_SENHA
+```
+
+### ⚠️ Notas sobre montagem FTP
+
+- **Uploads**: são instantâneos (staging local) e finalizam em background no Telegram. ✅
+- **Downloads**: completos funcionam bem. Para **assistir vídeos grandes direto do "disco"**
+  (seek constante), o FTP mount não é o ideal — prefira o remote via SFTP acima ou os produtos de streaming
+  do ecossistema (Nebula Stream).
+- RaiDrive e rclone fazem listagem/cache — dar uma olhada nas configurações de cache ajuda em pastas grandes.
 
 ---
 
-## 🔧 Recursos Técnicos
+## 🌌 Ecossistema Nebula
 
-### Arquitetura
+O **Nebula FTP** faz parte de um ecossistema maior:
 
-┌─────────────────────────────────────────────┐
-│ Cliente FTP (FileZilla) │
-└─────────────────┬───────────────────────────┘
-│
-┌─────────────────▼───────────────────────────┐
-│ Nebula FTP Server (Python) │
-│ ┌──────────────────────────────────────┐ │
-│ │ - Multi-Bot Manager (Round Robin) │ │
-│ │ - Smart Seek (Streaming) │ │
-│ │ - Retry Logic (5x + Backoff) │ │
-│ │ - Garbage Collector (Auto-Clean) │ │
-│ └──────────────────────────────────────┘ │
-└─────────────────┬───────────────────────────┘
-│
-┌─────────┴─────────┐
-│ │
-┌───────▼────────┐ ┌───────▼────────┐
-│ SQLite/MongoDB │ │ Telegram │
-│ (Metadados)    │ │ (Arquivos) │
-└────────────────┘ └────────────────┘
+| Projeto | Descrição | Status |
+|---------|-----------|--------|
+| **[NebulaFTP](docs/ECOSYSTEM.md#-nebulaftp)** | Servidor FTP + SFTP com Telegram (**este repositório**) | ✅ **Disponível** |
+| **[NebulaStream](docs/ECOSYSTEM.md#-nebulastreaming)** | Interface Web + Player de streaming | 🚧 Em desenvolvimento |
+| **[NebulaWebDAV](docs/ECOSYSTEM.md#%EF%B8%8F-nebulawebdav)** | Servidor WebDAV para Kodi/Plex | 🚧 Em desenvolvimento |
+| **[NebulaSFTP](docs/ECOSYSTEM.md#-nebulasftp)** | Produto SFTP dedicado (o acesso SFTP já existe no NebulaFTP) | 📋 Planejado |
 
+> 💎 **Multi-Bot, canal de backup e velocidades até 60 MB/s são recursos exclusivos da versão Pro.**
+> A Community usa 1 bot. [Saiba mais sobre o Ecossistema →](docs/ECOSYSTEM.md)
 
-### Tecnologias
+---
 
-- **Python 3.10+** - Linguagem principal
-- **Pyrogram** - Cliente MTProto (rápido)
-- **pyftpdlib** - Servidor FTP assíncrono
-- **Motor** - Driver MongoDB assíncrono
-- **aiofiles** - I/O assíncrono de arquivos
-- **Docker** - Containerização
+## 🐳 Docker — detalhes
+
+- **`docker-compose.yml`** — deploy padrão com `docker compose` (rede host; persiste `staging/`,
+  `nebula.db`, logs, sessão do bot e chave SFTP em volumes).
+- **`portainer-stack.yml`** — mesma stack pronta para colar no **Portainer** (Stacks → Web editor).
+
+**Portas padrão expostas na máquina:** `2121` (FTP) · `2222` (SFTP) · `8080` (painel web).
+
+**Persistência importante (não esqueça):** o `nebula.db` (metadados) e o `Nebula_MonoBot.session`
+(sessão do bot) precisam estar em volumes — o compose já faz isso. Se rodar manualmente
+(`docker run`), monte essas pastas/arquivos para não perder os dados ao recriar o container.
+
+**Auto-correção (entrypoint):** a imagem traz um `entrypoint.sh` que garante que `nebula.db`,
+`nebula.log`, `sftp_host_key` e `Nebula_MonoBot.session` existam como **arquivos** dentro do
+container — se você esquecer o passo de criação no host e o Docker criar um diretório vazio no
+lugar do bind mount, o entrypoint corrige automaticamente na subida. (Arquivos vazios são válidos:
+o SQLite e o Pyrogram os inicializam na primeira execução.)
+
+**Backend MongoDB no Docker:** se usar `DB_TYPE=mongodb`, aponte `MONGODB` para um MongoDB
+acessível (ex.: MongoDB Atlas ou um container Mongo separado).
+
+---
+
+## ❓ Solução de problemas (rápida)
+
+| Problema | Causa provável / solução |
+|---|---|
+| `Connection refused` | Servidor parado, porta errada ou firewall. Libere `2121` (e `2222`, `8080`). |
+| Trava em listar/baixar | Modo passivo: use EPSV no cliente ou defina `HOST` com o IP da máquina (dica acima). |
+| `Peer id invalid` nos logs | O bot não é admin do canal — adicione como administrador. |
+| Esqueci a senha do `admin` | No SQLite, pare o serviço, apague o `nebula.db` (ou o usuário na tabela `users`) e reinicie — o `admin/admin` é recriado. |
+| Container recriado perdeu arquivos | `nebula.db`/sessão não estavam em volume — veja a seção Docker. |
 
 ---
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Veja nosso [Guia de Contribuição](CONTRIBUTING.md).
-
-### Como ajudar:
-- 🐛 Reportar bugs
-- 💡 Sugerir melhorias
-- 📝 Melhorar documentação
-- 🌍 Traduzir para outros idiomas
-- ⭐ Dar uma estrela no projeto!
+Contribuições são bem-vindas! Abra uma [issue](https://github.com/samucamg/NebulaFTP/issues) ou um
+[pull request](https://github.com/samucamg/NebulaFTP/pulls) — e ⭐ dê uma estrela no projeto!
 
 ---
 
 ## 📜 Licença
 
-Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para detalhes.
+Este projeto está sob a licença **MIT**. Veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
 ## 💬 Suporte
 
-### 💬 Comunidade
-- **Telegram:** [t.me/NebulaFTP](https://t.me/NebulaFTP)
-- **Discord:** [discord.gg/nebula](https://discord.gg/nebula)
-
-### 🐛 Bugs e Sugestões
-- **Issues:** [GitHub Issues](https://github.com/samucamg/NebulaFTP/issues)
-- **Discussões:** [GitHub Discussions](https://github.com/samucamg/NebulaFTP/discussions)
-
-### 📧 Contato Direto
-- **Email:** samuel@inglescurso.com.br  apenas para assuntos comerciais, não dou suporte, não tiro dúvidas.  Atendo apenas comercialmente.
-
----
-
-## 🌟 Agradecimentos
-
-Agradecimentos especiais a minha esposa e meu filho por aguentarem as longas horas de trabalho e desenvolvimento.
+- 🐛 **Bugs e sugestões:** [GitHub Issues](https://github.com/samucamg/NebulaFTP/issues)
+- 💡 **Discussões:** [GitHub Discussions](https://github.com/samucamg/NebulaFTP/discussions)
+- 💎 **Versão Pro / assuntos comerciais:** samuel@inglescurso.com.br *(apenas comercial — sem suporte gratuito por e-mail)*
 
 ---
 
@@ -340,7 +395,6 @@ Agradecimentos especiais a minha esposa e meu filho por aguentarem as longas hor
 ![GitHub Stars](https://img.shields.io/github/stars/samucamg/NebulaFTP?style=social)
 ![GitHub Forks](https://img.shields.io/github/forks/samucamg/NebulaFTP?style=social)
 ![GitHub Issues](https://img.shields.io/github/issues/samucamg/NebulaFTP)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/samucamg/NebulaFTP)
 
 ---
 
@@ -348,57 +402,4 @@ Agradecimentos especiais a minha esposa e meu filho por aguentarem as longas hor
 
 **Feito com ❤️ por [Samuel de Sousa Santos](https://github.com/samucamg)**
 
-[⬆ Voltar ao topo](#-nebula-ftp)
-
 </div>
-
-
-![SamucaFtp bash](https://i.imgur.com/PNNrmwA.jpg)
-
-<details>
-<summary><b>Você necessita configurar as variáveis abaixo:</b></summary>
-
-`API_ID`: Acesse [my.telegram.org](https://my.telegram.org) para obter o seu.
-
-`API_HASH`: Acesse [my.telegram.org](https://my.telegram.org) para obter o seu.
-
-`BOT_TOKEN`: Crie um novo bot utilizando [BotFather](https://telegram.dog/botfather).
-
-`DB_TYPE`: Escolha entre `sqlite` (padrão) e `mongodb`.
-
-`DB_FILE`: Nome do arquivo SQLite (Padrão: `nebula.db`).
-
-`MONGODB`: Apenas se `DB_TYPE=mongodb`. Crie um DB e obtenha o link em [mongodb.com] (https://www.mongodb.com/)
-
-`CHAT_ID`: Id do Chat para onde serão enviados os arquivos.
-
-`HOST`: Host do FTP deixe como padrão (Padrão: 0.0.0.0).
-
-`PORT`: Porta do servidor FTP (Padrão: 2121).
-
-`SFTP_PORT`: Porta do servidor SFTP (Padrão: 2222).
-
-</details>
-
-<details>
-<summary><b>Setup:</b></summary>
-Antes de iniciar o setup, verifique se você tem o python3 instalado, ou instale utilizando o comando abaixo:
- ```sudo apt update && sudo apt install python3-pip -y ```
-A seguir:
-
-  1. Crie um novo bot em [BotFather](https://telegram.dog/botfather).
-  2. Obtenha o API_ID e API_HASH em [my.telegram.org](https://my.telegram.org).
-  3. Crie um banco de dados Mongo DB com o nome de ftp [MongoDB Cloud](https://cloud.mongodb.com/) (ou use seu servidor) e copie a string de conexão.
-Aprenda aqui, [Como Criar gratuitamente sua base de dados Mongo DB] (https://www.youtube.com/watch?v=6b3YH0kK3ig)
-  Caso pretenda utilizar uma quantidade muito grande de arquivos, é preferível criar o seu próprio banco de dados Mongo-db veja o tutorial sobre [Como instalar e Criar sua base de dados Mongo DB no ubuntu 20.04] (https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-20-04-pt)
-  4. Coloque todas as variáveis em na raiz do bot no arquivo .env
-  5. Adicione o bot ao seu canal com direito de administrador.
-  6. Execute o arquivo 'python3 get_channel_id.py`, envie o comando `/id` no seu canal para obter o id do canal.
-  7. Copie o ID para .env
-  8. Execute 'python3 setup_database.py`.
-  9. Execute 'python3 accounts_manager.py` para criar sua conta ftp.
-  10. Execute `main.py`.
-
-</details>
-<summary>Aconselho a utilização de Uma VPS ou windows com wsl2 com <b>Ubuntu 22.04</b></summary>
-# teste
