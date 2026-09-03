@@ -1,3 +1,5 @@
+[🇧🇷 Português](#) | [🇺🇸 English](INSTALLATION-en.md)
+
 # 💾 Instalação — Python Manual
 
 Guia completo para instalar o Nebula FTP diretamente com Python (sem Docker).
