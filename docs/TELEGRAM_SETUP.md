@@ -7,7 +7,7 @@ Este guia ensina como criar e configurar tudo que você precisa no Telegram para
 ## 🎯 O Que Você Precisa
 
 1. **API Credentials** (API_ID e API_HASH)
-2. **Bot Token(s)** (1 ou mais bots)
+2. **Bot Token(s)** (1 ou mais bots — Community usa apenas o 1º)
 3. **Canal Privado** (onde os arquivos ficam)
 4. **ID do Canal** (número de identificação)
 
@@ -18,8 +18,6 @@ Este guia ensina como criar e configurar tudo que você precisa no Telegram para
 ### 1.1 Acesse my.telegram.org
 
 Abra seu navegador e vá para: [**https://my.telegram.org**](https://my.telegram.org)
-
-![Telegram Login](images/telegram_setup_1.png)
 
 ### 1.2 Faça Login
 
@@ -43,11 +41,12 @@ Você receberá um código no Telegram. Digite-o no site.
 ### 1.5 Copie as Credenciais
 
 Você verá:
+```
 App api_id: 12345678
 App api_hash: abc123def456789...
+```
 
-
-✅ **Copie e salve** esses valores!
+✅ **Copie e salve** esses valores — eles vão para `API_ID` e `API_HASH` no `.env`.
 
 ---
 
@@ -55,44 +54,32 @@ App api_hash: abc123def456789...
 
 ### 2.1 Abra o BotFather
 
-No Telegram, busque por: **@BotFather**
-
-Ou clique: https://t.me/BotFather
+No Telegram, busque por: **@BotFather** → https://t.me/BotFather
 
 ### 2.2 Crie um Novo Bot
 
-Envie o comando:
-/newbot
+Envie o comando `/newbot` e siga as instruções:
 
-### 2.3 Escolha um Nome
+- **Nome:** `Nebula FTP Bot`
+- **Username:** `nebula_ftp_bot` (deve terminar com `bot`)
 
-**BotFather:** Alright, a new bot. How are we going to call it?
+### 2.3 Copie o Token
 
-Você: `Nebula FTP Bot`
-
-### 2.4 Escolha um Username
-
-**BotFather:** Good. Now let's choose a username for your bot.
-
-Você: `nebula_ftp_bot` (deve terminar com `bot`)
-
-### 2.5 Copie o Token
-
-Você receberá:
-Done! Congratulations on your new bot.
-
+Você receberá algo como:
+```
 Use this token to access the HTTP API:
 1234567890:AABBccDDeeFFggHH...
+```
 
+✅ **Copie e salve** esse token — ele vai para `BOT_TOKENS` no `.env`.
 
-✅ **Copie e salve** esse token!
+### 2.4 (Opcional) Criar Mais Bots — Versão Pro 💎
 
-### 2.6 (Opcional) Criar Mais Bots
+A versão Community usa **apenas o primeiro token**. Para Multi-Bot (4-8 bots, até 60 MB/s),
+veja a [versão Pro](ECOSYSTEM.md).
 
-Para melhor performance, crie 2-4 bots repetindo os passos acima:
-- `nebula_ftp_bot_1`
-- `nebula_ftp_bot_2`
-- etc.
+Se quiser criar bots extras para futura migração Pro, repita os passos acima e separe os tokens
+por vírgula em `BOT_TOKENS`.
 
 ---
 
@@ -102,10 +89,10 @@ Para melhor performance, crie 2-4 bots repetindo os passos acima:
 
 No Telegram:
 1. Menu → **New Channel**
-2. Nome: `Nebula FTP Storage`
-3. Tipo: **Private** (IMPORTANTE!)
+2. Nome: `Nebula FTP Storage` (qualquer nome)
+3. Tipo: **Private** ⚠️ IMPORTANTE!
 
-### 3.2 Adicionar os Bots como Admin
+### 3.2 Adicionar o(s) Bot(s) como Admin
 
 1. Abra o canal
 2. Menu → **Administrators** → **Add Admin**
@@ -113,59 +100,49 @@ No Telegram:
 4. Marque **todas as permissões**
 5. Salve
 
-Repita para todos os bots.
+Repita para todos os bots criados.
 
 ---
 
 ## 🔢 Passo 4: Obter ID do Canal
 
-### Método 1: UseInfoBot (Mais Fácil)
+### Via @userinfobot (mais fácil)
 
 1. Busque por **@userinfobot** no Telegram
 2. Inicie a conversa (`/start`)
 3. **Encaminhe** uma mensagem do seu canal para o bot
 4. O bot responderá com o ID:
+   ```
+   Chat: -1001234567890
+   ```
 
-Chat: -1001234567890
-
-
-✅ **Copie esse número!**
-
-### Método 2: Via Script Python
-
-Se você já configurou o ambiente:
-
-python get_channel_id.py
-
-
-Envie `/id` no seu canal e o bot responderá com o ID.
+✅ **Copie esse número** — ele vai para `CHAT_ID` no `.env`.
 
 ---
 
-## ✅ Resumo - O Que Você Tem Agora
+## ✅ Resumo — O Que Você Tem Agora
 
-Antes de continuar, confirme que você tem:
+Antes de continuar, confirme:
 
 - [ ] `API_ID` (8 dígitos)
 - [ ] `API_HASH` (32 caracteres)
-- [ ] `BOT_TOKEN` (um ou mais)
+- [ ] `BOT_TOKENS` (um ou mais tokens)
 - [ ] Canal privado criado
-- [ ] Bots adicionados como admin no canal
-- [ ] `CHAT_ID` do canal (formato: -100XXXXXXXXX)
+- [ ] Bot(s) adicionado(s) como admin no canal
+- [ ] `CHAT_ID` do canal (formato: `-100XXXXXXXXX`)
 
 ---
 
 ## 🔧 Configurar o .env
 
-Edite o arquivo `.env`:
+No arquivo `.env`, preencha ao menos:
 
- ```
+```env
 API_ID=12345678
 API_HASH=abc123def456789...
-BOT_TOKENS=1234567890:AABBcc...,9876543210:AAFFdd...
+BOT_TOKENS=1234567890:AABBcc...
 CHAT_ID=-1001234567890
- ```
-
+```
 
 ---
 
@@ -176,9 +153,8 @@ CHAT_ID=-1001234567890
 **Causa:** O bot não foi adicionado como admin no canal.
 
 **Solução:**
-1. Vá no canal
-2. Administrators → Add Admin
-3. Adicione o bot com todas as permissões
+1. Vá no canal → Administrators → Add Admin
+2. Adicione o bot com **todas as permissões**
 
 ### "The user must be an administrator"
 
@@ -186,16 +162,15 @@ CHAT_ID=-1001234567890
 
 **Solução:**
 1. Remova o bot do canal
-2. Adicione novamente
-3. Marque **todas as caixas** de permissões
+2. Adicione novamente marcando **todas as caixas**
 
 ### "Chat not found"
 
-**Causa:** O ID do canal está errado.
+**Causa:** O ID do canal está errado ou sem o prefixo `-100`.
 
 **Solução:**
 1. Use @userinfobot para confirmar o ID
-2. Verifique se tem o `-100` no início
+2. Verifique se começa com `-100`
 
 ---
 
@@ -203,11 +178,10 @@ CHAT_ID=-1001234567890
 
 ✅ Telegram configurado!
 
-Agora escolha como instalar:
-- **[Instalação Python](INSTALLATION.md)** - Linux/Windows/Mac
-- **[Instalação Docker](DOCKER.md)** - Mais rápido e fácil
+Agora escolha como instalar o servidor:
+- **[Instalação via Docker](DOCKER.md)** — mais rápido, recomendado para VPS Linux
+- **[Instalação Python nativa](INSTALLATION.md)** — Linux, Windows ou macOS
 
 ---
 
 [← Voltar ao README](../README.md)
-

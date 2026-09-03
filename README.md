@@ -9,6 +9,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/samucamg/NebulaFTP/pulls)
 
+[🇧🇷 Português](#) | [🇺🇸 English](README-en.md)
+
 **Servidor FTP + SFTP** com painel web de administração, usando o **Telegram como backend de armazenamento**.
 
 </div>
