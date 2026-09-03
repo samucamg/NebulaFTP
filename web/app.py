@@ -1,10 +1,13 @@
 import asyncio
+import aiosqlite
+import json
 import aiohttp_jinja2
 import jinja2
 import base64
 from aiohttp import web
 from os import environ
 from ftp.server import User, Permission
+import json
 
 # Basic Auth wrapper
 @web.middleware
@@ -41,7 +44,6 @@ async def handle_index(request):
         async for u in users_cursor:
             users.append(u)
     else:
-        import aiosqlite, json
         async with aiosqlite.connect(db) as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute("SELECT * FROM users") as cursor:
@@ -64,7 +66,6 @@ async def handle_add_user(request):
                 if not existing:
                     await db.users.insert_one({"login": login, "password": password, "permissions": []})
             else:
-                import aiosqlite, json
                 async with aiosqlite.connect(db) as conn:
                     async with conn.execute("SELECT id FROM users WHERE login = ?", (login,)) as cursor:
                         existing = await cursor.fetchone()
@@ -83,7 +84,6 @@ async def handle_edit_user(request):
     if db_type == "mongodb":
         user_doc = await db.users.find_one({"login": login})
     else:
-        import aiosqlite, json
         async with aiosqlite.connect(db) as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute("SELECT * FROM users WHERE login = ?", (login,)) as cursor:
@@ -116,7 +116,6 @@ async def handle_edit_user(request):
                 if new_pass:
                     await db.users.update_one({"login": login}, {"$set": {"password": new_pass}})
         else:
-            import aiosqlite, json
             async with aiosqlite.connect(db) as conn:
                 if action == 'add_perm':
                     path = data.get('path', '/').strip()
@@ -144,7 +143,6 @@ async def handle_edit_user(request):
     if db_type == "mongodb":
         user_doc = await db.users.find_one({"login": login})
     else:
-        import aiosqlite, json
         async with aiosqlite.connect(db) as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute("SELECT * FROM users WHERE login = ?", (login,)) as cursor:
@@ -166,7 +164,6 @@ async def handle_delete_user(request):
         if db_type == "mongodb":
             await db.users.delete_one({"login": login})
         else:
-            import aiosqlite
             async with aiosqlite.connect(db) as conn:
                 await conn.execute("DELETE FROM users WHERE login = ?", (login,))
                 await conn.commit()

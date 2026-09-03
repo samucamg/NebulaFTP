@@ -24,7 +24,7 @@
 - ✨ **Armazenamento Ilimitado** - Sem limites de espaço (apenas do Telegram)
 - ⚡ **Velocidade Real** - 10+ MB/s com MTProto (sem API HTTP lenta) **(Velocidade Máxima com Multi-Bot)**
 - 🔐 **Privacidade Total** - Arquivos ofuscados com UUID (modo Stealth)
-- ~~🎬 **Streaming Inteligente**~~ - Assista vídeos 4K sem baixar tudo **(Apenas no Nebula Stream)**
+- 🎬 **Streaming Inteligente** - Assista vídeos 4K sem baixar tudo **(Disponível via SFTP!)**
 - 🤖 **Multi-Bot** - Distribui carga entre vários bots automaticamente, aumentando a performance. **(Apenas na Versão Pro)**
 - 👥 **Multi-Usuário** - Sistema completo de permissões por pasta. 
 - 🐳 **Docker Ready** - Instalação em 1 comando
@@ -173,6 +173,31 @@ O **Nebula FTP** faz parte de um ecossistema maior:
 
 ---
 
+
+---
+
+## 🚀 Como montar como disco de rede (WebDAV) usando Rclone e SFTP
+
+Como o Nebula FTP agora tem suporte completo a **SFTP com Streaming de Vídeo**, você pode usar o `rclone` para montá-lo localmente ou via WebDAV:
+
+1. Instale o [Rclone](https://rclone.org/).
+2. Rode `rclone config`.
+3. Escolha `n` (New remote) e dê um nome, ex: `nebula`.
+4. Escolha `sftp` (SSH/SFTP).
+5. Em host digite `127.0.0.1` (ou o IP do seu servidor).
+6. Em port digite `2222` (ou a porta configurada no `SFTP_PORT`).
+7. Em user, digite o usuário criado (ex: `admin`).
+8. Pressione enter na senha e digite a sua senha (ou configure chave SSH se suportado).
+9. Aceite e salve.
+
+Para montar no seu sistema via WebDAV para acessar localmente ou na sua TV (Kodi, etc):
+```bash
+rclone serve webdav nebula: --addr :8080 --vfs-cache-mode writes
+```
+Agora você pode acessar em `http://127.0.0.1:8080/` e reproduzir vídeos diretamente através da integração SFTP do Nebula!
+
+---
+
 ## ⚙️ Configuração (.env)
 
 API do Telegram (obtenha em my.telegram.org)
@@ -186,10 +211,16 @@ IDs dos Canais (copie de @userinfobot)
 
 CHAT_ID=-1001234567890
 BACKUP_CHAT_ID=-1009876543210 # Opcional
-MongoDB (local ou Atlas)
+Database (SQLite como Padrão)
 
+DB_TYPE=sqlite
+DB_FILE=nebula.db
+
+Para usar MongoDB:
+DB_TYPE=mongodb
 MONGODB=mongodb://localhost:27017
-Servidor FTP
+
+Servidor FTP e SFTP
 
 HOST=0.0.0.0
 PORT=2121
@@ -248,8 +279,8 @@ LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR
 ┌─────────┴─────────┐
 │ │
 ┌───────▼────────┐ ┌───────▼────────┐
-│ MongoDB │ │ Telegram │
-│ (Metadados) │ │ (Arquivos) │
+│ SQLite/MongoDB │ │ Telegram │
+│ (Metadados)    │ │ (Arquivos) │
 └────────────────┘ └────────────────┘
 
 
@@ -333,13 +364,19 @@ Agradecimentos especiais a minha esposa e meu filho por aguentarem as longas hor
 
 `BOT_TOKEN`: Crie um novo bot utilizando [BotFather](https://telegram.dog/botfather).
 
-`MONGODB`: Crie um DB e obtenha o link de conexão em [mongodb.com] (https://www.mongodb.com/)
+`DB_TYPE`: Escolha entre `sqlite` (padrão) e `mongodb`.
+
+`DB_FILE`: Nome do arquivo SQLite (Padrão: `nebula.db`).
+
+`MONGODB`: Apenas se `DB_TYPE=mongodb`. Crie um DB e obtenha o link em [mongodb.com] (https://www.mongodb.com/)
 
 `CHAT_ID`: Id do Chat para onde serão enviados os arquivos.
 
 `HOST`: Host do FTP deixe como padrão (Padrão: 0.0.0.0).
 
-`PORT`: Porta do servidor FTP (Padrão: 9021).
+`PORT`: Porta do servidor FTP (Padrão: 2121).
+
+`SFTP_PORT`: Porta do servidor SFTP (Padrão: 2222).
 
 </details>
 
