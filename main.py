@@ -1,4 +1,6 @@
 import asyncio
+import aiosqlite
+import json
 import os
 import time
 import logging
@@ -15,10 +17,10 @@ from pyrogram.errors import FloodWait, RPCError
 
 # Imports locais
 from ftp import Server, MongoDBUserManager, MongoDBPathIO
-import aiosqlite
 import json
 from ftp.sqlite_db import SQLiteUserManager, SQLitePathIO
 from ftp.common import UPLOAD_QUEUE
+import json
 from ftp.sftp import start_sftp_server
 from ftp.pathio import PathIONursery
 from web import start_web_server
@@ -217,7 +219,6 @@ async def folder_watcher(db_wrapper):
                                         upsert=True
                                     )
                                 else:
-                                    import aiosqlite
                                     async with aiosqlite.connect(db_wrapper.db_path) as conn:
                                         async with conn.execute("SELECT id FROM files WHERE name = ? AND parent = ?", (part, current_parent)) as cursor:
                                             if not await cursor.fetchone():
@@ -236,7 +237,6 @@ async def folder_watcher(db_wrapper):
                             if db_wrapper.db_type == "mongodb":
                                 await db_wrapper.db_client.files.insert_one(file_doc)
                             else:
-                                import aiosqlite, json
                                 async with aiosqlite.connect(db_wrapper.db_path) as conn:
                                     await conn.execute("INSERT INTO files (type, name, parent, size, status, local_path, mtime, ctime, parts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_doc["type"], file_doc["name"], file_doc["parent"], file_doc["size"], file_doc["status"], file_doc["local_path"], file_doc["mtime"], file_doc["ctime"], json.dumps([])))
                                     await conn.commit()
