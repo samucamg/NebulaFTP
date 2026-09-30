@@ -14,12 +14,14 @@ class NebulaSFTPFile:
         self._file = file_obj
         self._path_io = path_io
 
-    async def read(self, size: int = -1, offset: int = 0) -> bytes:
+    async def seek(self, offset: int = 0) -> None:
         if hasattr(self._file, 'seek'):
             res = self._file.seek(offset)
             if asyncio.iscoroutine(res):
                 await res
 
+    async def read(self, size: int = -1, offset: int = 0) -> bytes:
+        await self.seek(offset)
         if hasattr(self._file, 'read'):
             res = self._file.read(size if size > 0 else -1)
             if asyncio.iscoroutine(res):
@@ -52,6 +54,7 @@ class NebulaSFTPFile:
         raise NotImplementedError("Download streaming via SFTP is not natively supported by this architecture yet. Use the Web UI/NebulaStream for downloads.")
 
     async def write(self, data: bytes, offset: int = 0) -> int:
+        await self.seek(offset)
         if hasattr(self._file, 'write'):
             res = self._file.write(data)
             if asyncio.iscoroutine(res):
@@ -74,11 +77,15 @@ class NebulaSFTPServer(asyncssh.SFTPServer):
 
     async def realpath(self, path: Union[str, bytes]) -> str:
         if isinstance(path, bytes):
-            path = path.decode('utf-8')
+            path = path.decode('utf-8', errors='replace')
         path = path.strip()
-        if not path or path == '.':
+        if not path:
             return '/'
-        return path if path.startswith('/') else f'/{path}'
+        posix_path = path if path.startswith('/') else f'/{path}'
+        normalized = os.path.normpath(posix_path).replace('\\', '/')
+        if not normalized.startswith('/'):
+            normalized = '/' + normalized
+        return normalized
 
     async def _resolve(self, path: Union[str, bytes]):
         path = await self.realpath(path)
@@ -107,21 +114,35 @@ class NebulaSFTPServer(asyncssh.SFTPServer):
     async def lstat(self, path: Union[str, bytes], flags: int = 0) -> asyncssh.SFTPAttrs:
         return await self.stat(path, flags)
 
-    async def opendir(self, path: Union[str, bytes]) -> Any:
+    async def scandir(self, path: Union[str, bytes]):
         p = await self._resolve(path)
         try:
-            items = []
-            async for item in self._path_io.list(p):
-                stat_info = await self._path_io.stat(p / item)
-                attrs = asyncssh.SFTPAttrs(
-                    size=stat_info.st_size,
-                    permissions=stat_info.st_mode,
-                    atime=int(stat_info.st_mtime),
-                    mtime=int(stat_info.st_mtime)
-                )
-                items.append(asyncssh.SFTPName(item, attrs=attrs))
-            return items
+            if hasattr(self._path_io, "listdir"):
+                names = await self._path_io.listdir(p)
+            elif hasattr(self._path_io, "list"):
+                res = self._path_io.list(p)
+                if asyncio.iscoroutine(res):
+                    names = await res
+                else:
+                    names = [item async for item in res]
+            else:
+                names = []
+
+            for item in names:
+                item_bytes = item.encode('utf-8') if isinstance(item, str) else item
+                try:
+                    stat_info = await self._path_io.stat(p / item)
+                    attrs = asyncssh.SFTPAttrs(
+                        size=stat_info.st_size,
+                        permissions=stat_info.st_mode,
+                        atime=int(stat_info.st_mtime),
+                        mtime=int(stat_info.st_mtime)
+                    )
+                except Exception:
+                    attrs = asyncssh.SFTPAttrs()
+                yield asyncssh.SFTPName(item_bytes, attrs=attrs)
         except Exception as e:
+            logger.error(f"SFTP scandir error on {path}: {e}")
             raise asyncssh.SFTPNoSuchFile(f"No such directory: {path}")
 
     async def readdir(self, handle: Any) -> List[asyncssh.SFTPName]:
@@ -186,7 +207,7 @@ class NebulaSSHServer(asyncssh.SSHServer):
         logger.info(f"SFTP connection received from {conn.get_extra_info('peername')}")
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
-        logger.info("SFTP connection lost")
+        logger.info(f"SFTP connection lost: {exc}")
         if self._user_info:
             asyncio.create_task(self.user_manager.notify_logout(self._user_info))
 
@@ -194,13 +215,21 @@ class NebulaSSHServer(asyncssh.SSHServer):
         return True
 
     async def validate_password(self, username: str, password: str) -> bool:
-        state, user, info = await self.user_manager.get_user(username)
-        # Store user info for cleanup in connection_lost even if authentication fails
-        self._user_info = user
-        if user and await self.user_manager.authenticate(user, password):
-            self._user = user
-            return True
-        return False
+        try:
+            state, user, info = await self.user_manager.get_user(username)
+            self._user_info = user
+            if user:
+                authenticated = await self.user_manager.authenticate(user, password)
+                logger.info(f"SFTP validate_password for '{username}': auth={authenticated}, user.pass={user.password}")
+                if authenticated:
+                    self._user = user
+                    return True
+            else:
+                logger.warning(f"SFTP validate_password for '{username}': user not found (state={state}, info={info})")
+            return False
+        except Exception as e:
+            logger.error(f"SFTP validate_password exception for '{username}': {e}", exc_info=True)
+            return False
 
     def session_requested(self) -> bool:
         return True
@@ -219,13 +248,18 @@ async def start_sftp_server(user_manager, path_io_nursery, host='0.0.0.0', port=
         return NebulaSSHServer(user_manager, path_io_nursery)
 
     def sftp_factory(conn):
-        ssh_server = conn.get_server_object()
-        user = ssh_server._user
+        conn_obj = conn.get_connection() if hasattr(conn, 'get_connection') else conn
+        ssh_server = getattr(conn_obj, '_owner', None)
+        if not ssh_server and hasattr(conn_obj, 'get_server_object'):
+            ssh_server = conn_obj.get_server_object()
+        user = getattr(ssh_server, '_user', None) if ssh_server else None
+        logger.info(f"sftp_factory created for user: {user.login if user else None}")
         return NebulaSFTPServer(conn, user, path_io_nursery)
 
     logger.info(f"🚀 Iniciando servidor SFTP em {host}:{port}")
-    await asyncssh.create_server(
+    server = await asyncssh.create_server(
         server_factory, host, port,
         server_host_keys=[server_key],
         sftp_factory=sftp_factory
     )
+    await server.wait_closed()

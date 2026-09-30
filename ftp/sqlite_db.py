@@ -124,6 +124,7 @@ class SQLitePathIO(AbstractPathIO):
     def state(self): return []
 
     def _absolute(self, path):
+        if not isinstance(path, PurePosixPath): path = PurePosixPath(path)
         if not path.is_absolute(): path = self.cwd / path
         return path
 
@@ -132,7 +133,7 @@ class SQLitePathIO(AbstractPathIO):
         return unicodedata.normalize('NFC', str(text))
 
     def _split_path(self, path_obj):
-        p_str = self._sanitize(path_obj.as_posix())
+        p_str = self._sanitize(path_obj.as_posix() if hasattr(path_obj, 'as_posix') else str(path_obj))
         if not p_str.startswith("/"): p_str = "/" + p_str
         if p_str != "/" and p_str.endswith("/"): p_str = p_str[:-1]
         return os.path.dirname(p_str), os.path.basename(p_str)
@@ -213,6 +214,30 @@ class SQLitePathIO(AbstractPathIO):
 
         return names
 
+    def list(self, path):
+        abs_path = self._absolute(path)
+
+        class Lister:
+            def __init__(cls_self):
+                cls_self.names = None
+                cls_self.idx = 0
+
+            def __aiter__(cls_self):
+                return cls_self
+
+            @universal_exception
+            async def __anext__(cls_self):
+                if cls_self.names is None:
+                    cls_self.names = await self.listdir(abs_path)
+                    cls_self.names = [n for n in cls_self.names if not n.endswith(".partial")]
+                if cls_self.idx < len(cls_self.names):
+                    name = cls_self.names[cls_self.idx]
+                    cls_self.idx += 1
+                    return abs_path / name
+                raise StopAsyncIteration
+
+        return Lister()
+
     @universal_exception
     async def rename(self, source, destination):
         s_parent, s_name = self._split_path(self._absolute(source))
@@ -254,7 +279,7 @@ class SQLitePathIO(AbstractPathIO):
                 self._memory_cache[cache_key_d] = doc
 
     @universal_exception
-    async def remove(self, path):
+    async def unlink(self, path):
         parent, name = self._split_path(self._absolute(path))
         async with aiosqlite.connect(SQLitePathIO.db_path) as db:
             await db.execute("DELETE FROM files WHERE name = ? AND parent = ?", (name, parent))

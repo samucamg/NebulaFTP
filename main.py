@@ -158,11 +158,11 @@ async def garbage_collector():
 
 async def folder_watcher(db_wrapper):
     """
-    Vigia a pasta 'staging' RECURSIVAMENTE.
+    Vigia a pasta 'watch' RECURSIVAMENTE.
     Mapeia arquivos para a PASTA DO UTILIZADOR.
     """
     logger.info("👀 Folder Watcher Iniciado")
-    staging_dir = "staging"
+    staging_dir = "watch"
     if not os.path.exists(staging_dir): os.makedirs(staging_dir)
 
     target_root = "/"
@@ -397,10 +397,6 @@ async def resolve_channel(bot):
 
     logger.info("🔍 Verificando acesso ao canal...")
     try:
-        async for dialog in bot.get_dialogs(limit=50): pass
-    except: pass
-
-    try:
         chat = await bot.get_chat(target_chat)
         logger.info(f"✅ Canal Confirmado: {chat.title} (ID: {chat.id})")
         try: await bot.send_message(chat.id, "🔄 Nebula FTP MonoBot Conectado", disable_notification=True)
@@ -422,12 +418,15 @@ async def main():
     if not token: logger.critical("❌ Sem token!"); return
 
     bot = Client("Nebula_MonoBot", api_id=api_id, api_hash=api_hash, bot_token=token)
-    logger.info("🤖 Iniciando Bot...")
+    logger.info("🤖 Iniciando Bot (MonoBot)...")
     try: await bot.start()
     except Exception as e: logger.critical(f"❌ Falha ao iniciar bot: {e}"); return
 
     target_chat_id = await resolve_channel(bot)
-    if not target_chat_id: await bot.stop(); return
+    if not target_chat_id:
+        await bot.stop()
+        return
+    bot.target_chat_id = target_chat_id
 
     loop = asyncio.get_event_loop()
 

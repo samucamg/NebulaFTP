@@ -1,61 +1,51 @@
-from pyrogram.errors import AuthBytesInvalid
-from pyrogram.file_id import FileId
-from pyrogram.session import Session, Auth
-from pyrogram.raw.functions.upload import GetFile
-from pyrogram.raw.functions.auth import ImportAuthorization, ExportAuthorization
-from pyrogram.raw.types import InputDocumentFileLocation
-from asyncio import sleep as asleep
+import logging
+
+logger = logging.getLogger("NebulaFTP.TG")
 
 class File:
-    def __init__(self, id, client):
-        self.id = FileId.decode(id)
+    def __init__(self, id, client, message_id=None, chat_id=None):
+        self.raw_id = id
         self.client = client
-        self.loc = InputDocumentFileLocation(id=self.id.media_id, access_hash=self.id.access_hash, file_reference=self.id.file_reference, thumb_size=self.id.thumbnail_size)
-
-    async def getChunkAt(self, offset=0):
-        session = await get_media_session(self.client, self.id)
-        try:
-            return (await session.send(GetFile(location=self.loc, offset=offset, limit=1024*1024))).bytes
-        except TimeoutError:
-            await asleep(1)
-            return await self.getChunkAt(offset)
+        self.message_id = message_id
+        self.chat_id = chat_id
 
     async def stream(self, offset=0):
         try:
-            while data := await self.getChunkAt(offset):
-                offset += len(data)
-                yield data
-                if len(data) != 1024*1024:
-                    break
-        except:
-            pass
-
-async def get_media_session(client, file_id):
-    if not (media_session := client.media_sessions.get(file_id.dc_id, None)):
-        if file_id.dc_id != await client.storage.dc_id():
-            media_session = Session(client, file_id.dc_id, await Auth(client, file_id.dc_id, await client.storage.test_mode()).create(), await client.storage.test_mode(), is_media=True)
-            await media_session.start()
-
-            for _ in range(6):
-                exported_auth = await client.invoke(ExportAuthorization(dc_id=file_id.dc_id))
+            chunk_offset = offset // (1024 * 1024)
+            skip_bytes = offset % (1024 * 1024)
+            
+            target = None
+            if self.message_id and self.chat_id:
                 try:
-                    await media_session.invoke(ImportAuthorization(id=exported_auth.id, bytes=exported_auth.bytes))
-                    break
-                except AuthBytesInvalid:
-                    continue
-            else:
-                await media_session.stop()
-                raise AuthBytesInvalid
-        else:
-            media_session = Session(client, file_id.dc_id, await client.storage.auth_key(), await client.storage.test_mode(), is_media=True)
-            await media_session.start()
-        client.media_sessions[file_id.dc_id] = media_session
-    return media_session
+                    target = await self.client.get_messages(self.chat_id, self.message_id)
+                    if not target or getattr(target, 'empty', False):
+                        target = None
+                except Exception as e:
+                    logger.warning(f"⚠️ [STREAM] Erro ao buscar mensagem {self.message_id}: {e}")
+                    target = None
 
-async def stream_file(parts, bot):
+            if not target:
+                target = self.raw_id
+
+            async for chunk in self.client.stream_media(target, offset=chunk_offset):
+                if skip_bytes > 0:
+                    if len(chunk) > skip_bytes:
+                        chunk = chunk[skip_bytes:]
+                        skip_bytes = 0
+                    else:
+                        skip_bytes -= len(chunk)
+                        continue
+                yield chunk
+        except Exception as e:
+            logger.error(f"❌ [STREAM] Erro durante streaming do Telegram: {e}")
+            if "MESSAGE_ID_INVALID" in str(e).upper() or "MESSAGE_DELETED" in str(e).upper():
+                raise FileNotFoundError("Arquivo foi apagado no Telegram (Fantasma)") from e
+            raise
+
+async def stream_file(parts, bot, chat_id=None):
     parts.sort(key=lambda x: x["part_id"])
-    parts = [p["tg_file"] for p in parts]
     for part in parts:
-        file = File(part, bot)
+        file = File(part["tg_file"], bot, message_id=part.get("tg_message"), chat_id=chat_id)
         async for chunk in file.stream():
             yield chunk
+
