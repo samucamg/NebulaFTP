@@ -67,12 +67,58 @@ class MongoDBMemoryIO:
     def __init__(self, node, mode, tg, db):
         self._node = node; self._mode = mode; self._tg = tg; self._db = db
         self.offset = 0
-        self.safe_name = f"{uuid4().hex}_{node.name}"
+        self.safe_name = f"{uuid4().hex}.tmp"
         self.local_path = os.path.join(CACHE_DIR, self.safe_name)
+        self._local_file_handle = None
 
     async def __aenter__(self): return self
     async def __aexit__(self, *args, **kwargs): pass
-    async def seek(self, offset=0): self.offset = offset
+    async def seek(self, offset=0):
+        self.offset = offset
+        if self._local_file_handle:
+            self._local_file_handle.seek(offset)
+
+    def write(self, data: bytes):
+        if self._local_file_handle is None:
+            self._local_file_handle = open(self.local_path, "ab" if "a" in self._mode else "wb")
+        if self.offset > 0 and self._local_file_handle.tell() != self.offset:
+            self._local_file_handle.seek(self.offset)
+        self._local_file_handle.write(data)
+        self.offset += len(data)
+        return len(data)
+
+    async def close(self):
+        if self._local_file_handle:
+            self._local_file_handle.close()
+            self._local_file_handle = None
+
+            if not os.path.exists(self.local_path):
+                return
+            final_size = os.path.getsize(self.local_path)
+            parent = self._node.parent
+            name = self._node.name
+            now = int(time())
+
+            doc_cache = {
+                "type": "file", "name": name, "parent": parent, "size": final_size,
+                "status": "staging", "local_path": self.local_path,
+                "mtime": now, "ctime": now, "parts": []
+            }
+
+            await self._finish_close(name, parent, final_size, doc_cache)
+
+    async def _finish_close(self, name, parent, final_size, doc_cache):
+        async with MongoDBPathIO._cache_lock:
+            MongoDBPathIO._memory_cache[f"{parent}::{name}"] = doc_cache
+        try:
+            if self._db is not None:
+                await self._db.files.replace_one({"name": name, "parent": parent}, doc_cache, upsert=True)
+        except: pass
+        if not name.endswith(".partial") and final_size > 0:
+            await UPLOAD_QUEUE.put({
+                "path": self.local_path, "filename": name, "parent": parent, "size": final_size
+            })
+            logger.info(f"📤 [SFTP] Upload enfileirado para Telegram: {name} ({final_size} bytes)")
 
     async def write_stream(self, stream):
         try:
@@ -87,7 +133,6 @@ class MongoDBMemoryIO:
         final_size = os.path.getsize(self.local_path)
         parent = self._node.parent
         name = self._node.name
-        cache_key = f"{parent}::{name}"
         now = int(time())
 
         doc_cache = {
@@ -96,24 +141,7 @@ class MongoDBMemoryIO:
             "mtime": now, "ctime": now, "parts": []
         }
 
-        # Atualiza Cache (Prioridade para Rclone)
-        async with MongoDBPathIO._cache_lock:
-            MongoDBPathIO._memory_cache[cache_key] = doc_cache
-
-        # Atualiza DB em background (best effort)
-        try:
-            await self._db.files.replace_one({"name": name, "parent": parent}, doc_cache, upsert=True)
-        except: pass
-
-        # 🛑 GARANTIA: NUNCA enfileira .partial aqui
-        if not name.endswith(".partial") and final_size > 0:
-             await UPLOAD_QUEUE.put({
-                "path": self.local_path, "filename": name, "parent": parent, "size": final_size
-            })
-             logger.info(f"📤 [WRITE] Upload direto enfileirado: {name}")
-        elif name.endswith(".partial"):
-             # Apenas log para debug, mas não enfileira
-             logger.debug(f"⏳ [WRITE] Aguardando rename para: {name}")
+        await self._finish_close(name, parent, final_size, doc_cache)
 
     async def iter_by_block(self, block_size):
         if self._node.local_path and os.path.exists(self._node.local_path):
@@ -135,9 +163,19 @@ class MongoDBMemoryIO:
             part_end = current_file_pos + part_size
             if part_end <= start_read_at: current_file_pos += part_size; continue
             local_offset = max(0, start_read_at - current_file_pos)
-            file = File(part["tg_file"], self._tg)
-            async for chunk in file.stream(offset=local_offset): yield chunk
+            chat_id = getattr(self._tg, 'target_chat_id', None) or environ.get("CHAT_ID")
+            if chat_id and str(chat_id).lstrip("-").isdigit():
+                chat_id = int(chat_id)
+            file = File(part["tg_file"], self._tg, message_id=part.get("tg_message"), chat_id=chat_id)
+            try:
+                async for chunk in file.stream(offset=local_offset): yield chunk
+            except FileNotFoundError:
+                logger.warning(f"👻 [GC Reverso] Arquivo fantasma detectado e removido: {self._node.path}")
+                try: await self._db.unlink(self._node.path)
+                except Exception: pass
+                raise FileNotFoundError(f"Arquivo corrompido/fantasma no Telegram: {self._node.path}")
             current_file_pos += part_size; start_read_at = current_file_pos
+
 
 class MongoDBPathIO(AbstractPathIO):
     db = None; tg = None
@@ -152,6 +190,7 @@ class MongoDBPathIO(AbstractPathIO):
     def state(self): return []
 
     def _absolute(self, path):
+        if not isinstance(path, PurePosixPath): path = PurePosixPath(path)
         if not path.is_absolute(): path = self.cwd / path
         return path
 
@@ -160,7 +199,7 @@ class MongoDBPathIO(AbstractPathIO):
         return unicodedata.normalize('NFC', str(text))
 
     def _split_path(self, path_obj):
-        p_str = self._sanitize(path_obj.as_posix())
+        p_str = self._sanitize(path_obj.as_posix() if hasattr(path_obj, 'as_posix') else str(path_obj))
         if not p_str.startswith("/"): p_str = "/" + p_str
         if p_str != "/" and p_str.endswith("/"): p_str = p_str[:-1]
         return os.path.dirname(p_str), os.path.basename(p_str)
