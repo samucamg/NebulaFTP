@@ -4,8 +4,8 @@ pymongo
 dnspython
 asyncio
 aiofiles
-pyrogram
-tgcrypto
+pyrofork==2.3.69
+tgcrypto-pyrofork
 dnspython
 python-dotenv
 requests
