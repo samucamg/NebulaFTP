@@ -76,12 +76,12 @@ Use this token to access the HTTP API:
 
 ✅ **Copy and save** this token — it goes into `BOT_TOKENS` in your `.env`.
 
-### 2.4 (Optional) Create More Bots — Pro version 💎
+### 2.4 (Optional) Create More Bots — Nébula Drive 💎
 
 The Community version uses **only the first token**. For Multi-Bot (4–8 bots, up to 60 MB/s),
-see the [Pro version](ECOSYSTEM-en.md).
+see the [Nébula Drive](NEBULA-DRIVE-en.md).
 
-If you want to create extra bots for a future Pro upgrade, repeat the steps above and separate
+If you want to create extra bots for a future Nébula Drive upgrade, repeat the steps above and separate
 the tokens with commas in `BOT_TOKENS`.
 
 ---
@@ -182,7 +182,7 @@ CHAT_ID=-1001234567890
 ✅ Telegram configured!
 
 Now choose how to install the server:
-- **[Docker Installation](DOCKER-en.md)** — fastest, recommended for Linux VPS
+- **[Docker Installation](INSTALLATION-en.md)** — fastest, recommended for Linux VPS
 - **[Native Python Installation](INSTALLATION-en.md)** — Linux, Windows or macOS
 
 ---
