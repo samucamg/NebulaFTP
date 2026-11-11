@@ -109,7 +109,7 @@ details.more .pop form:last-child { margin-bottom: 0; }
         <td class="num hide-sm">{{ it.mtime|dt }}</td>
         <td class="act">
           {% if not it.is_dir %}
-            {% if it.media %}<a class="iconbtn" href="/files/play?{{ {'path': it.path}|urlencode }}" title="Tocar" aria-label="Tocar"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></a>{% endif %}
+            {% if it.media == 'image' %}<a class="iconbtn" href="/files/play?{{ {'path': it.path}|urlencode }}" title="Ver imagem" aria-label="Ver imagem"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg></a>{% elif it.media %}<a class="iconbtn" href="/files/play?{{ {'path': it.path}|urlencode }}" title="Tocar" aria-label="Tocar"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></a>{% endif %}
             <a class="iconbtn" href="/files/download?{{ {'path': it.path}|urlencode }}" title="Baixar" aria-label="Baixar"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z"/></svg></a>
           {% endif %}
           <details class="more">

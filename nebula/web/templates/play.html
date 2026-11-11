@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{{ name }}{% endblock %}
 {% block content %}
+<style>.viewer-img { display: block; max-width: 100%; max-height: 78vh; margin: 0 auto; object-fit: contain; border-radius: 8px; }</style>
 <h1>{{ name }}</h1>
 <div class="card">
-  {% if kind == 'video' %}
+  {% if kind == 'image' %}
+    <a href="{{ src }}" target="_blank" rel="noopener" title="Abrir em tamanho original"><img class="viewer-img" src="{{ src }}" alt="{{ name }}"></a>
+  {% elif kind == 'video' %}
     <video controls preload="metadata" src="{{ src }}"></video>
   {% else %}
     <audio controls preload="metadata" src="{{ src }}"></audio>

@@ -374,3 +374,26 @@ async def test_logo_publica_sem_login_e_nada_mais(client, core):
     assert r.status == 302
     html = await (await client.get("/login")).text()
     assert "/static/logo-full.png" in html
+
+
+# ---------------- visualizador de imagens ----------------
+async def test_pagina_ver_imagem(client, core, alice):
+    assert (await upload(alice, "/", [("foto.jpg", b"\xff\xd8\xff" + b"0" * 10)])).status == 303
+    r = await alice.get("/files/play", params={"path": "/foto.jpg"})
+    assert r.status == 200
+    html = await r.text()
+    assert "<img" in html and "/files/stream?path=%2Ffoto.jpg" in html
+    assert "Ver imagem" in await (await alice.get("/files", params={"path": "/"})).text()
+    await drain(core)
+    s = await alice.get("/files/stream", params={"path": "/foto.jpg"})
+    assert s.status == 200 and s.headers["Content-Type"] == "image/jpeg"
+    assert s.headers["X-Content-Type-Options"] == "nosniff"
+
+
+async def test_svg_nao_vira_imagem(client, core, alice):
+    assert (await upload(alice, "/", [("x.svg", b"<svg onload='alert(1)'/>")])).status == 303
+    r = await alice.get("/files/play", params={"path": "/x.svg"})
+    assert r.status != 200
+    await drain(core)
+    s = await alice.get("/files/stream", params={"path": "/x.svg"})
+    assert s.headers["Content-Type"] == "application/octet-stream"

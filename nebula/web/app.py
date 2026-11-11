@@ -36,6 +36,9 @@ STATIC = Path(__file__).parent / "static"
 MEDIA = {
     ".mp4": "video", ".webm": "video",
     ".mp3": "audio", ".m4a": "audio", ".ogg": "audio", ".opus": "audio", ".wav": "audio",
+    # SVG fica de fora de propósito: pode conter script.
+    ".jpg": "image", ".jpeg": "image", ".png": "image", ".gif": "image",
+    ".webp": "image", ".avif": "image", ".bmp": "image",
 }
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 PUBLIC_PATHS = {"/login"}
@@ -44,6 +47,8 @@ _RANGE_RE = re.compile(r"^bytes=(\d*)-(\d*)$")
 # Tipos que o mimetypes do Python pode não conhecer em todas as plataformas.
 mimetypes.add_type("audio/ogg", ".opus")
 mimetypes.add_type("audio/mp4", ".m4a")
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("image/avif", ".avif")
 
 log = logging.getLogger("nebula.web")
 
@@ -399,7 +404,7 @@ async def stream_get(request: web.Request):
     try:
         size = rh.size
         ctype = mimetypes.guess_type(name)[0] or "application/octet-stream"
-        if not (ctype.startswith("video/") or ctype.startswith("audio/")):
+        if not (ctype.startswith(("video/", "audio/")) or (ctype.startswith("image/") and ctype != "image/svg+xml")):
             ctype = "application/octet-stream"  # HTML/SVG enviado por usuário nunca roda no painel
         headers = {
             "Accept-Ranges": "bytes", "Content-Type": ctype,
