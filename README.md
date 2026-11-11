@@ -17,6 +17,11 @@
 
 ---
 
+## 🎬 Vídeo tutorial
+
+<p align="center"><a href="https://youtu.be/2jr48gSxMwg"><img src="https://img.youtube.com/vi/2jr48gSxMwg/maxresdefault.jpg" width="720"></a></p>
+<p align="center">▶️ Clique na imagem para assistir no YouTube</p>
+
 ## 💡 O que você ganha
 
 - ☁️ **Espaço ilimitado** — seus arquivos ficam guardados em um canal privado do Telegram. Sem mensalidade de armazenamento. (A velocidade de envio é limitada, pois esta edição usa um único bot — veja abaixo.)

@@ -17,6 +17,11 @@
 
 ---
 
+## 🎬 Video tutorial (Portuguese)
+
+<p align="center"><a href="https://youtu.be/2jr48gSxMwg"><img src="https://img.youtube.com/vi/2jr48gSxMwg/maxresdefault.jpg" width="720"></a></p>
+<p align="center">▶️ Click the image to watch on YouTube</p>
+
 ## 💡 What you get
 
 - ☁️ **Unlimited space** — your files are kept in a private Telegram channel. No storage fees. (Upload speed is limited, since this edition uses a single bot — see below.)
