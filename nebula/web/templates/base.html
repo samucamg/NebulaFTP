@@ -3,78 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Painel{% endblock %} · NebulaFTP</title>
+<title>{% block title %}Painel{% endblock %} · Nebula FTP</title>
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <style>
 :root {
-  --bg: #f4f6fb; --fg: #1d2433; --muted: #667085; --card: #ffffff; --line: #e2e6ef;
-  --accent: #4f46e5; --accent-fg: #ffffff; --danger: #b42318; --warn: #b54708; --ok: #067647;
+  --bg: #f6f7fb; --fg: #141a3a; --muted: #5f6880; --card: #ffffff; --line: #e4e7f0; --soft: #eef0fa;
+  --accent: #5b5bd6; --accent-2: #06b6d4; --accent-fg: #ffffff; --hover: #eceefe; --active: #e0e2fd;
+  --danger: #c0262d; --warn: #b54708; --ok: #067647; --shadow: 0 1px 2px rgba(20,26,58,.06), 0 4px 16px rgba(20,26,58,.06);
+  --grad: linear-gradient(135deg, #8b5cf6 0%, #6366f1 55%, #06b6d4 100%);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1420; --fg: #e6eaf2; --muted: #98a2b3; --card: #171e2e; --line: #2a3347;
-    --accent: #818cf8; --accent-fg: #0f1420; --danger: #f97066; --warn: #fdb022; --ok: #32d583;
+    --bg: #0e1220; --fg: #e8ebf5; --muted: #9aa3ba; --card: #161b2e; --line: #262d45; --soft: #1b2137;
+    --accent: #a5b4fc; --accent-fg: #0e1220; --hover: #1e2540; --active: #262f55;
+    --danger: #f97066; --warn: #fdb022; --ok: #32d583; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1420; --fg: #e6eaf2; --muted: #98a2b3; --card: #171e2e; --line: #2a3347;
-  --accent: #818cf8; --accent-fg: #0f1420; --danger: #f97066; --warn: #fdb022; --ok: #32d583;
+  --bg: #0e1220; --fg: #e8ebf5; --muted: #9aa3ba; --card: #161b2e; --line: #262d45; --soft: #1b2137;
+  --accent: #a5b4fc; --accent-fg: #0e1220; --hover: #1e2540; --active: #262f55;
+  --danger: #f97066; --warn: #fdb022; --ok: #32d583; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.25);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-header { background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-header .brand { font-weight: 700; color: var(--accent); text-decoration: none; font-size: 17px; }
-nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-nav a { color: var(--fg); text-decoration: none; padding: 6px 10px; border-radius: 6px; }
-nav a:hover, nav a.active { background: var(--line); }
-main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 16px; }
-footer { color: var(--muted); text-align: center; font-size: 13px; padding: 16px; border-top: 1px solid var(--line); }
-h1 { font-size: 22px; margin: 8px 0 16px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; min-height: 100vh; }
+a { color: var(--accent); }
+svg.i { width: 20px; height: 20px; flex: 0 0 auto; fill: currentColor; }
+
+/* ---------- topo ---------- */
+.top { position: sticky; top: 0; z-index: 10; height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 20px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand .mark { height: 34px; width: auto; }
+.brand .word { height: 22px; width: auto; }
+.brand .word.dark { display: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .brand .word.light { display: none; } :root:not([data-theme="light"]) .brand .word.dark { display: block; } }
+.spacer { flex: 1; }
+.me { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--grad); color: #fff; display: grid; place-items: center; font-weight: 700; text-transform: uppercase; }
+.me .who { line-height: 1.2; }
+.me .who small { display: block; color: var(--muted); font-size: 12px; }
+
+/* ---------- estrutura ---------- */
+.shell { display: grid; grid-template-columns: 248px 1fr; min-height: calc(100vh - 64px); }
+.side { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--line); }
+.side a.nav { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-radius: 999px; color: var(--fg); text-decoration: none; font-weight: 500; }
+.side a.nav:hover { background: var(--hover); }
+.side a.nav.active { background: var(--active); color: var(--fg); font-weight: 700; }
+.side .grow { flex: 1; }
+.storage { padding: 12px 16px; color: var(--muted); font-size: 13px; display: flex; gap: 10px; align-items: center; }
+.storage b { color: var(--fg); font-weight: 600; display: block; }
+.upsell { margin: 8px 4px 0; padding: 14px; border-radius: 14px; background: var(--soft); border: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.upsell strong { color: var(--fg); display: block; margin-bottom: 4px; font-size: 14px; }
+.upsell a { display: inline-block; margin-top: 8px; font-weight: 600; text-decoration: none; }
+main { padding: 24px 28px 40px; min-width: 0; }
+.bare main { max-width: none; padding: 0; }
+footer { color: var(--muted); text-align: center; font-size: 12px; padding: 16px; }
+
+/* ---------- componentes ---------- */
+h1 { font-size: 24px; font-weight: 600; margin: 0 0 16px; letter-spacing: -.01em; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
 .muted { color: var(--muted); }
-.alert { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--danger); color: var(--danger); }
-button, .btn { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 6px; padding: 7px 12px; font: inherit; cursor: pointer; text-decoration: none; display: inline-block; }
+.alert { border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger); }
+button, .btn { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 999px; padding: 9px 18px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+button:hover, .btn:hover { filter: brightness(1.06); }
 button.secondary, .btn.secondary { background: transparent; color: var(--fg); border: 1px solid var(--line); }
-button.danger { background: var(--danger); color: #fff; }
-input[type=text], input[type=password], input[type=file] { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); max-width: 100%; }
+button.secondary:hover, .btn.secondary:hover { background: var(--hover); filter: none; }
+button.danger { background: transparent; color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); }
+button.danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); filter: none; }
+.btn.primary-grad { background: var(--grad); color: #fff; }
+input[type=text], input[type=password] { font: inherit; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); max-width: 100%; }
+input[type=text]:focus, input[type=password]:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); border-color: var(--accent); }
 label { display: inline-flex; gap: 6px; align-items: center; }
 form.inline { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0; }
-.row-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-.crumbs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 12px; }
-.crumbs a { color: var(--accent); text-decoration: none; }
+.row-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: -6px 0 16px; font-size: 14px; }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--accent); }
 .crumbs .sep { color: var(--muted); }
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; padding: 4px 6px; }
 table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--hover); }
 th { color: var(--muted); font-weight: 600; font-size: 13px; }
-td.num { white-space: nowrap; }
-.badge { font-size: 12px; border: 1px solid var(--warn); color: var(--warn); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+td.num { white-space: nowrap; color: var(--muted); font-size: 14px; }
+.badge { font-size: 12px; background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--warn); border-radius: 999px; padding: 2px 10px; white-space: nowrap; margin-left: 8px; }
+.badge.ok { background: color-mix(in srgb, var(--ok) 12%, transparent); color: var(--ok); }
 .actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.actions a { color: var(--accent); text-decoration: none; }
-video, audio { width: 100%; max-height: 70vh; background: #000; border-radius: 8px; }
-@media (max-width: 600px) {
-  main { padding: 12px; }
+.actions a { color: var(--accent); text-decoration: none; font-weight: 600; }
+video, audio { width: 100%; max-height: 72vh; background: #000; border-radius: 12px; }
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line); padding: 8px; }
+  .side .grow, .storage, .upsell { display: none; }
+  main { padding: 16px; }
+  .me .who { display: none; }
   th.hide-sm, td.hide-sm { display: none; }
 }
+{% block style %}{% endblock %}
 </style>
 </head>
-<body>
-<header>
-  <a class="brand" href="/files">NebulaFTP</a>
-  {% if me %}
-  <nav>
-    <a href="/files" class="{{ 'active' if request.path == '/files' }}">Arquivos</a>
-    {% if me.is_admin %}<a href="/users" class="{{ 'active' if request.path.startswith('/users') }}">Usuários</a>{% endif %}
-    <span class="muted">{{ me.login }}{% if me.is_admin %} (admin){% endif %}</span>
+<body class="{{ '' if me else 'bare' }}">
+{% if me %}
+<header class="top">
+  <a class="brand" href="/files" aria-label="Nebula FTP">
+    <img class="mark" src="/static/logo-mark.png" alt="" width="47" height="34">
+    <img class="word light" src="/static/logo-text.png" alt="Nebula FTP" width="152" height="22">
+    <img class="word dark" src="/static/logo-text-dark.png" alt="Nebula FTP" width="152" height="22">
+  </a>
+  <span class="spacer"></span>
+  <div class="me">
+    <span class="avatar" aria-hidden="true">{{ me.login[:1] }}</span>
+    <span class="who">{{ me.login }}<small>{{ 'Administrador' if me.is_admin else 'Usuário' }}</small></span>
     <form class="inline" method="post" action="/logout">
       <input type="hidden" name="csrf" value="{{ csrf }}">
       <button type="submit" class="secondary">Sair</button>
     </form>
-  </nav>
-  {% endif %}
+  </div>
 </header>
-<main>
+<div class="shell">
+  <nav class="side" aria-label="Navegação">
+    <a class="nav {{ 'active' if request.path.startswith('/files') }}" href="/files">
+      <svg class="i" viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>Meus arquivos</a>
+    {% if me.is_admin %}
+    <a class="nav {{ 'active' if request.path.startswith('/users') }}" href="/users">
+      <svg class="i" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h7v-2.5c0-.9.4-1.8 1.1-2.6A11 11 0 0 0 8 13zm8 0c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg>Usuários</a>
+    {% endif %}
+    <span class="grow"></span>
+    <div class="storage">
+      <svg class="i" viewBox="0 0 24 24"><path d="M19.4 10A7.5 7.5 0 0 0 5.1 8.5 6 6 0 0 0 6 20h13a5 5 0 0 0 .4-10z"/></svg>
+      <span><b>Espaço ilimitado</b>guardado no seu Telegram</span>
+    </div>
+    <div class="upsell">
+      <strong>💎 Nébula Drive</strong>
+      Bibliotecas de filmes e livros, compartilhamento, Office online e muito mais.
+      <br><a href="https://github.com/samucamg/NebulaFTP/blob/master/docs/NEBULA-DRIVE.md" target="_blank" rel="noopener">Conhecer →</a>
+    </div>
+  </nav>
+  <main>
 {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+<main>
+{% block bare %}{{ self.content() }}{% endblock %}
 </main>
-<footer>NebulaFTP Community</footer>
+{% endif %}
 </body>
 </html>

@@ -361,3 +361,16 @@ async def test_html_enviado_nao_roda_no_painel(client, core, alice):
     r = await alice.get("/files/stream", params={"path": "/x.html"})
     assert r.headers["Content-Type"].startswith("application/octet-stream")
     assert r.headers["X-Content-Type-Options"] == "nosniff"
+
+
+async def test_logo_publica_sem_login_e_nada_mais(client, core):
+    r = await client.get("/static/logo-mark.png", allow_redirects=False)
+    assert r.status == 200 and r.content_type == "image/png"
+    for bad in ("/static/../app.py", "/static/%2e%2e/app.py", "/static/..%2fapp.py"):
+        r = await client.get(bad, allow_redirects=False)
+        assert r.status in (302, 403, 404), bad
+        assert b"aiohttp_jinja2" not in await r.read(), bad
+    r = await client.get("/files", allow_redirects=False)
+    assert r.status == 302
+    html = await (await client.get("/login")).text()
+    assert "/static/logo-full.png" in html

@@ -1,25 +1,42 @@
 {% extends "base.html" %}
 {% block title %}Usuários{% endblock %}
+{% block style %}
+.head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.head h1 { margin: 0; }
+.u { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+.u .avatar { width: 36px; height: 36px; font-size: 14px; }
+.u small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
+td.act { text-align: right; }
+td.act .actions { justify-content: flex-end; }
+.role { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; background: var(--soft); color: var(--muted); }
+.role.admin { background: color-mix(in srgb, #8b5cf6 15%, transparent); color: #6d28d9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .role.admin { color: #c4b5fd; } }
+.chk { font-size: 13px; color: var(--muted); }
+{% endblock %}
 {% block content %}
-<h1>Usuários</h1>
+<div class="head">
+  <h1>Usuários</h1>
+  <a class="btn primary-grad" href="/users/add">
+    <svg class="i" viewBox="0 0 24 24"><path d="M15 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2zm9 4c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg>Novo usuário</a>
+</div>
 {% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
-<p><a class="btn" href="/users/add">Novo usuário</a></p>
 <div class="card table-wrap">
   <table>
-    <thead><tr><th>Login</th><th>Admin</th><th>Ações</th></tr></thead>
+    <thead><tr><th>Usuário</th><th>Papel</th><th class="hide-sm">Pasta</th><th></th></tr></thead>
     <tbody>
     {% for u in users %}
       <tr>
-        <td>{{ u.login }}</td>
-        <td>{{ 'sim' if u.is_admin else 'não' }}</td>
-        <td>
+        <td><div class="u"><span class="avatar" aria-hidden="true">{{ u.login[:1] }}</span><span>{{ u.login }}</span></div></td>
+        <td>{% if u.is_admin %}<span class="role admin">Administrador</span>{% else %}<span class="role">Usuário</span>{% endif %}</td>
+        <td class="hide-sm muted">{{ 'todas (raiz)' if u.is_admin else '/' ~ u.login }}</td>
+        <td class="act">
           <div class="actions">
-            <a href="/users/edit/{{ u.login }}">Editar</a>
+            <a class="btn secondary" href="/users/edit/{{ u.login }}">Editar</a>
             {% if u.login != admin_login and u.login != me.login %}
             <form class="inline" method="post" action="/users/delete/{{ u.login }}"
                   onsubmit="return confirm('Remover o usuário {{ u.login|e }}?');">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <label><input type="checkbox" name="delete_files" value="1"> apagar arquivos</label>
+              <label class="chk"><input type="checkbox" name="delete_files" value="1"> apagar arquivos</label>
               <button type="submit" class="danger">Remover</button>
             </form>
             {% endif %}

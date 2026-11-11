@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/samucamg/NebulaFTP/refs/heads/master/img/logo_nebula_ftp.png" alt="Logo Nebula FTP" width="300px">
+<img src="https://cdn.inglescurso.org/file/1eCvmMGofB-JGLwgWTcPmvDwuVnhZqEDn/nebula-ftp-logo.png" alt="Logo Nebula FTP" width="300px">
 
 ### **Unlimited space for your files, powered by Telegram**
 
@@ -37,16 +37,16 @@
 
 <table>
 <tr>
-<td><img src="img/community/arquivos.svg" alt="Your files"></td>
-<td><img src="img/community/player.svg" alt="Video player"></td>
+<td><img src="https://cdn.inglescurso.org/file/1CChiNQ6FJscwTyqkyAcDHwQWwA9r78Ak/nebula-ftp-print-arquivos.png" alt="Your files"></td>
+<td><img src="https://cdn.inglescurso.org/file/1VYubEs1IWrRWTNEjAcvk91Q0f7SLpgf-/nebula-ftp-print-player.png" alt="Video player"></td>
 </tr>
 <tr>
 <td align="center"><b>Your files</b> in the browser</td>
 <td align="center"><b>Watch</b> without downloading</td>
 </tr>
 <tr>
-<td><img src="img/community/usuarios.svg" alt="Manage users"></td>
-<td><img src="img/community/login.svg" alt="Login screen"></td>
+<td><img src="https://cdn.inglescurso.org/file/1uD4GoCSTUHl3yIxpChv2GQLwlQjJECrm/nebula-ftp-print-usuarios.png" alt="Manage users"></td>
+<td><img src="https://cdn.inglescurso.org/file/1txk7IYoNrd36Ka9LURBa6Z8R_8ZSnkId/nebula-ftp-print-login.png" alt="Login screen"></td>
 </tr>
 <tr>
 <td align="center"><b>Manage</b> your users</td>

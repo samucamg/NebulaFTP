@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/samucamg/NebulaFTP/refs/heads/master/img/logo_nebula_ftp.png" alt="Logo Nebula FTP" width="300px">
+<img src="https://cdn.inglescurso.org/file/1eCvmMGofB-JGLwgWTcPmvDwuVnhZqEDn/nebula-ftp-logo.png" alt="Logo Nebula FTP" width="300px">
 
 ### **Espaço ilimitado para os seus arquivos, usando o Telegram**
 
@@ -37,16 +37,16 @@
 
 <table>
 <tr>
-<td><img src="img/community/arquivos.svg" alt="Seus arquivos"></td>
-<td><img src="img/community/player.svg" alt="Player de vídeo"></td>
+<td><img src="https://cdn.inglescurso.org/file/1CChiNQ6FJscwTyqkyAcDHwQWwA9r78Ak/nebula-ftp-print-arquivos.png" alt="Seus arquivos"></td>
+<td><img src="https://cdn.inglescurso.org/file/1VYubEs1IWrRWTNEjAcvk91Q0f7SLpgf-/nebula-ftp-print-player.png" alt="Player de vídeo"></td>
 </tr>
 <tr>
 <td align="center"><b>Seus arquivos</b> no navegador</td>
 <td align="center"><b>Assista</b> sem baixar</td>
 </tr>
 <tr>
-<td><img src="img/community/usuarios.svg" alt="Gerenciar usuários"></td>
-<td><img src="img/community/login.svg" alt="Tela de login"></td>
+<td><img src="https://cdn.inglescurso.org/file/1uD4GoCSTUHl3yIxpChv2GQLwlQjJECrm/nebula-ftp-print-usuarios.png" alt="Gerenciar usuários"></td>
+<td><img src="https://cdn.inglescurso.org/file/1txk7IYoNrd36Ka9LURBa6Z8R_8ZSnkId/nebula-ftp-print-login.png" alt="Tela de login"></td>
 </tr>
 <tr>
 <td align="center"><b>Gerencie</b> os usuários</td>

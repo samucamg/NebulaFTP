@@ -32,6 +32,7 @@ COOKIE = "nebula_session"
 SESSION_TTL = 12 * 3600
 CHUNK = 1024 * 1024
 TEMPLATES = Path(__file__).parent / "templates"
+STATIC = Path(__file__).parent / "static"
 MEDIA = {
     ".mp4": "video", ".webm": "video",
     ".mp3": "audio", ".m4a": "audio", ".ogg": "audio", ".opus": "audio", ".wav": "audio",
@@ -212,7 +213,7 @@ async def _middleware(request: web.Request, handler):
     request[CSRF] = csrf
     request[SESSION] = token if principal else None
 
-    if principal is None and request.path not in PUBLIC_PATHS:
+    if principal is None and request.path not in PUBLIC_PATHS and not request.path.startswith("/static/"):
         raise web.HTTPFound("/login")
 
     try:
@@ -547,6 +548,7 @@ def create_app(vfs: NebulaVFS, store: Store, settings: Settings) -> web.Applicat
         filters={"filesize": _filesize, "dt": _dt},
     )
     r = app.router
+    r.add_static("/static", STATIC, append_version=True)
     r.add_get("/", index)
     r.add_get("/login", login_get)
     r.add_post("/login", login_post)

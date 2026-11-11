@@ -1,75 +1,144 @@
 {% extends "base.html" %}
 {% block title %}Arquivos{% endblock %}
+{% block style %}
+.head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.head h1 { margin: 0; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tools details { position: relative; }
+.tools summary { list-style: none; }
+.tools summary::-webkit-details-marker { display: none; }
+.pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); min-width: 300px; }
+.pop .row-form { flex-wrap: nowrap; }
+.pop input[type=text] { flex: 1; min-width: 0; }
+.pick { position: relative; cursor: pointer; }
+.pick input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.pick:focus-within { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+.hint { font-size: 13px; margin: 0 0 16px; }
+.name { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.name a, .name span.t { color: var(--fg); text-decoration: none; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name a:hover { color: var(--accent); }
+.ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: 0 0 auto; }
+.ico svg { width: 19px; height: 19px; fill: currentColor; }
+.ico.dir { background: #e8eaff; color: #4f46e5; } .ico.video { background: #ede7ff; color: #7c3aed; }
+.ico.audio { background: #dff7f2; color: #0f9d7a; } .ico.image { background: #ffe6ef; color: #d6336c; }
+.ico.doc { background: #e3f2ff; color: #1d6fd6; } .ico.file { background: var(--soft); color: var(--muted); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ico { background: var(--soft) !important; } }
+td.act { white-space: nowrap; text-align: right; }
+.iconbtn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--muted); text-decoration: none; }
+.iconbtn:hover { background: var(--active); color: var(--accent); }
+.iconbtn svg { width: 20px; height: 20px; fill: currentColor; }
+details.more { display: inline-block; position: relative; vertical-align: middle; }
+details.more summary { list-style: none; cursor: pointer; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more .pop { min-width: 320px; text-align: left; }
+details.more .pop form { margin-bottom: 10px; }
+details.more .pop form:last-child { margin-bottom: 0; }
+.empty { text-align: center; padding: 48px 16px; }
+.empty svg { width: 56px; height: 56px; fill: var(--line); }
+{% endblock %}
 {% block content %}
-<h1>Arquivos</h1>
-<nav class="crumbs" aria-label="Caminho">
-  {% for c in crumbs %}
-    {% if not loop.first %}<span class="sep">/</span>{% endif %}
-    {% if loop.last %}<strong>{{ c.name }}</strong>{% else %}<a href="/files?{{ {'path': c.path}|urlencode }}">{{ c.name }}</a>{% endif %}
-  {% endfor %}
-</nav>
-
-<div class="card">
-  <form class="row-form" method="post" action="/files/mkdir">
-    <input type="hidden" name="csrf" value="{{ csrf }}">
-    <input type="hidden" name="path" value="{{ path }}">
-    <input type="text" name="name" placeholder="Nome da nova pasta" required maxlength="255">
-    <button type="submit">Nova pasta</button>
-  </form>
-  <form class="row-form" method="post" action="/files/upload" enctype="multipart/form-data">
-    <input type="hidden" name="csrf" value="{{ csrf }}">
-    <input type="hidden" name="path" value="{{ path }}">
-    <input type="file" name="files" multiple required>
-    <button type="submit">Enviar arquivos</button>
-  </form>
-  <p class="muted" style="margin:0;font-size:13px;">Arquivos grandes são enviados em partes. Enquanto aparecer "enviando ao Telegram", baixar e reproduzir já funcionam, mas podem ser mais lentos.</p>
+<div class="head">
+  <h1>{{ crumbs[-1].name if crumbs|length > 1 else 'Meus arquivos' }}</h1>
+  <div class="tools">
+    <details>
+      <summary class="btn secondary">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3z"/></svg>Nova pasta</summary>
+      <div class="pop">
+        <form class="row-form" method="post" action="/files/mkdir">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <input type="hidden" name="path" value="{{ path }}">
+          <input type="text" name="name" placeholder="Nome da nova pasta" required maxlength="255">
+          <button type="submit">Criar</button>
+        </form>
+      </div>
+    </details>
+    <form class="row-form upload" method="post" action="/files/upload" enctype="multipart/form-data">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="path" value="{{ path }}">
+      <label class="btn primary-grad pick">
+        <svg class="i" viewBox="0 0 24 24"><path d="M19.4 10A7.5 7.5 0 0 0 5.1 8.5 6 6 0 0 0 6 20h13a5 5 0 0 0 .4-10zM14 13v4h-4v-4H7l5-5 5 5z"/></svg>Enviar arquivos
+        <input type="file" name="files" multiple required aria-label="Escolher arquivos" onchange="if(this.files.length)this.form.submit()">
+      </label>
+      <noscript><button type="submit">Enviar</button></noscript>
+    </form>
+  </div>
 </div>
+{% if crumbs|length > 1 %}<nav class="crumbs" aria-label="Caminho">
+  {% for c in crumbs %}
+    {% if not loop.first %}<span class="sep">›</span>{% endif %}
+    {% if loop.last %}<span>{{ 'Meus arquivos' if loop.first else c.name }}</span>{% else %}<a href="/files?{{ {'path': c.path}|urlencode }}">{{ 'Meus arquivos' if loop.first else c.name }}</a>{% endif %}
+  {% endfor %}
+</nav>{% endif %}
+<p class="hint muted">Arquivos grandes são enviados em partes. Enquanto aparecer "enviando ao Telegram", baixar e reproduzir já funcionam, mas podem ser mais lentos.</p>
 
 <div class="card table-wrap">
   {% if items %}
   <table>
     <thead>
-      <tr><th>Nome</th><th class="hide-sm">Tamanho</th><th class="hide-sm">Modificado</th><th>Ações</th></tr>
+      <tr><th>Nome</th><th class="hide-sm">Tamanho</th><th class="hide-sm">Modificado</th><th></th></tr>
     </thead>
     <tbody>
     {% for it in items %}
+      {% set ext = (it.name.rsplit('.', 1)[-1] if '.' in it.name else '')|lower %}
+      {% if it.is_dir %}{% set kind = 'dir' %}
+      {% elif it.media == 'video' or ext in ['mp4','mkv','webm','avi','mov','m4v'] %}{% set kind = 'video' %}
+      {% elif it.media == 'audio' or ext in ['mp3','m4a','ogg','opus','wav','flac','aac'] %}{% set kind = 'audio' %}
+      {% elif ext in ['jpg','jpeg','png','gif','webp','heic','svg','bmp'] %}{% set kind = 'image' %}
+      {% elif ext in ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt','odt','ods','epub','md','csv'] %}{% set kind = 'doc' %}
+      {% else %}{% set kind = 'file' %}{% endif %}
       <tr>
         <td>
-          {% if it.is_dir %}
-            <a href="/files?{{ {'path': it.path}|urlencode }}">{{ it.name }}/</a>
-          {% else %}
-            {{ it.name }}
-            {% if not it.synced %}<span class="badge">enviando ao Telegram</span>{% endif %}
-          {% endif %}
+          <div class="name">
+            <span class="ico {{ kind }}" aria-hidden="true"><svg viewBox="0 0 24 24">
+              {% if kind == 'dir' %}<path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/>
+              {% elif kind == 'video' %}<path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11z"/>
+              {% elif kind == 'audio' %}<path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/>
+              {% elif kind == 'image' %}<path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5z"/>
+              {% elif kind == 'doc' %}<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm2 16H8v-2h8zm0-4H8v-2h8zm-3-5V3.5L18.5 9z"/>
+              {% else %}<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9z"/>{% endif %}
+            </svg></span>
+            {% if it.is_dir %}
+              <a href="/files?{{ {'path': it.path}|urlencode }}" title="{{ it.name }}/">{{ it.name }}</a>
+            {% else %}
+              <span class="t" title="{{ it.name }}">{{ it.name }}</span>
+              {% if not it.synced %}<span class="badge">enviando ao Telegram</span>{% endif %}
+            {% endif %}
+          </div>
         </td>
         <td class="num hide-sm">{% if not it.is_dir %}{{ it.size|filesize }}{% else %}&ndash;{% endif %}</td>
         <td class="num hide-sm">{{ it.mtime|dt }}</td>
-        <td>
-          <div class="actions">
-            {% if not it.is_dir %}
-              <a href="/files/download?{{ {'path': it.path}|urlencode }}">Baixar</a>
-              {% if it.media %}<a href="/files/play?{{ {'path': it.path}|urlencode }}">Tocar</a>{% endif %}
-            {% endif %}
-            <form class="inline" method="post" action="/files/rename">
-              <input type="hidden" name="csrf" value="{{ csrf }}">
-              <input type="hidden" name="path" value="{{ it.path }}">
-              <input type="text" name="new_name" value="{{ it.name }}" required maxlength="255" aria-label="Novo nome">
-              <button type="submit" class="secondary">Renomear</button>
-            </form>
-            <form class="inline" method="post" action="/files/delete"
-                  onsubmit="return confirm('Apagar este item{{ ' e todo o conteúdo' if it.is_dir }}?');">
-              <input type="hidden" name="csrf" value="{{ csrf }}">
-              <input type="hidden" name="path" value="{{ it.path }}">
-              <button type="submit" class="danger">Apagar</button>
-            </form>
-          </div>
+        <td class="act">
+          {% if not it.is_dir %}
+            {% if it.media %}<a class="iconbtn" href="/files/play?{{ {'path': it.path}|urlencode }}" title="Tocar" aria-label="Tocar"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></a>{% endif %}
+            <a class="iconbtn" href="/files/download?{{ {'path': it.path}|urlencode }}" title="Baixar" aria-label="Baixar"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z"/></svg></a>
+          {% endif %}
+          <details class="more">
+            <summary class="iconbtn" title="Mais ações" aria-label="Mais ações"><svg viewBox="0 0 24 24"><path d="M12 8a2 2 0 1 0-2-2 2 2 0 0 0 2 2zm0 2a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm0 6a2 2 0 1 0 2 2 2 2 0 0 0-2-2z"/></svg></summary>
+            <div class="pop">
+              <form class="row-form" method="post" action="/files/rename">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <input type="hidden" name="path" value="{{ it.path }}">
+                <input type="text" name="new_name" value="{{ it.name }}" required maxlength="255" aria-label="Novo nome">
+                <button type="submit" class="secondary">Renomear</button>
+              </form>
+              <form method="post" action="/files/delete"
+                    onsubmit="return confirm('Apagar este item{{ ' e todo o conteúdo' if it.is_dir }}?');">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <input type="hidden" name="path" value="{{ it.path }}">
+                <button type="submit" class="danger">Apagar</button>
+              </form>
+            </div>
+          </details>
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p class="muted">Esta pasta está vazia.</p>
+  <div class="empty">
+    <svg viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+    <p class="muted">Esta pasta está vazia. Use <b>Enviar arquivos</b> para começar.</p>
+  </div>
   {% endif %}
 </div>
 {% endblock %}
