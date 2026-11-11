@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/samucamg/NebulaFTP/refs/heads/master/img/logo_nebula_cloud.png" alt="Logo Nébula Drive" width="300px">
+<img src="../img/drive/logo-nebula-drive.png" alt="Logo Nébula Drive" width="300px">
 
 ## 💎 Nébula Drive
 
@@ -44,7 +44,7 @@ O **Nébula Drive** é a edição completa do NebulaFTP. Ele substitui, ao mesmo
 
 ## ☁️ 1. Sua nuvem pessoal (Meu Drive)
 
-<img src="../img/drive/meu-drive.svg" alt="Meu Drive" width="100%">
+<img src="https://cdn.inglescurso.org/file/1tIJ2XQIsLIkerygDAeWrKRIzqJQywCrs/nebula-drive-print-meu-drive.png" alt="Meu Drive" width="100%">
 
 Tudo o que você espera de uma nuvem moderna, com espaço de sobra:
 
@@ -59,7 +59,7 @@ Tudo o que você espera de uma nuvem moderna, com espaço de sobra:
 
 ## 🎬 2. Cinema em casa: filmes e séries
 
-<img src="../img/drive/filmes.svg" alt="Biblioteca de filmes" width="100%">
+<img src="https://cdn.inglescurso.org/file/1hNoblJw-DtPJSNEO-GfrPvwFWMUPBXsb/nebula-drive-print-filmes.png" alt="Biblioteca de filmes" width="100%">
 
 Suas pastas de vídeo viram uma plataforma de streaming:
 
@@ -69,13 +69,12 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 - ⏯️ **Continuar assistindo:** parou no celular? Continue na TV ou no computador, do segundo exato onde parou. Ao terminar um episódio, ele já sugere o próximo.
 - 🗂️ **Bibliotecas separadas:** Filmes Dublados, Filmes Legendados, Séries Dubladas, Séries Legendadas e mais.
 
-<img src="../img/drive/serie.svg" alt="Série com temporadas" width="100%">
+<img src="https://cdn.inglescurso.org/file/1oXFOiBdiWOut8Qmib4-SOVdolX6SB0h-/nebula-drive-print-serie.png" alt="Série com temporadas" width="100%">
 
 ---
 
 ## 📱 3. Mini novelas
 
-<img src="../img/drive/mini-novelas.svg" alt="Mini novelas" width="100%">
 
 - Uma vitrine só para **novelas curtas, doramas e séries verticais**.
 - **Filtros rápidos** por idioma e tema (Dublado, Legendado, Brasileiro, CEO, Vingança, Romance...).
@@ -85,7 +84,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## 📚 4. Livros, quadrinhos e audiolivro
 
-<img src="../img/drive/livros.svg" alt="Biblioteca de livros" width="100%">
+<img src="https://cdn.inglescurso.org/file/1JqSNpt6izwCKKART8czPnOky--ZnLoPa/nebula-drive-print-livros.png" alt="Biblioteca de livros" width="100%">
 
 - 📖 **Abre tudo no navegador:** livros digitais (EPUB, MOBI, Kindle, PDF, FB2, TXT) e quadrinhos e mangás (CBZ, CBR), sem instalar nada.
 - 🎧 **Vira audiolivro com um clique:** vozes naturais em português (Thalita, Francisca, Antonio) leem o livro para você. A frase lida fica destacada e **a página vira sozinha**.
@@ -94,13 +93,12 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 - 🖍️ **Estude dentro do livro:** sumário, busca no texto, grifos coloridos com anotações e marcadores.
 - 🔖 **Continuar lendo:** abra o livro em qualquer aparelho e volte para a página exata onde parou.
 
-<img src="../img/drive/leitor-voz.svg" alt="Leitor com voz" width="100%">
+<img src="https://cdn.inglescurso.org/file/1CsUvjgGvBGhGteDkVBHScDQsRD9epxD-/nebula-drive-print-leitor-voz.png" alt="Leitor de livros e documentos" width="100%">
 
 ---
 
 ## 🎵 5. Músicas e vídeo aulas
 
-<img src="../img/drive/musicas.svg" alt="Músicas" width="100%">
 
 - 🎶 **Músicas organizadas sozinhas** por **Artista → Álbum → Faixa**, com player na própria tela que toca o álbum inteiro.
 - 🎓 **Vídeo aulas e vídeos de família** organizados por pasta e por data, guardando o seu progresso em cada aula.
@@ -109,7 +107,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## 📝 6. Office online
 
-<img src="../img/drive/office.svg" alt="Office online" width="100%">
+<img src="https://cdn.inglescurso.org/file/19mwQ8mZ2z3jpCA53Xh4ob8IgfelI73Se/nebula-drive-print-office.png" alt="Office online" width="100%">
 
 - ➕ **Crie pelo botão "+ Novo"** um documento, uma planilha ou uma apresentação em branco.
 - ✏️ **Edite no navegador** arquivos do Word, Excel e PowerPoint, com formatação completa — sem ter o Office instalado.
@@ -119,7 +117,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## 🔗 7. Compartilhar com família, amigos e clientes
 
-<img src="../img/drive/compartilhar.svg" alt="Compartilhar" width="100%">
+<img src="https://cdn.inglescurso.org/file/1DEEiowlq5aUEd3wb6XFT4ezOvSuEZMzD/nebula-drive-print-compartilhar.png" alt="Compartilhar" width="100%">
 
 - 👥 **Compartilhe com pessoas ou grupos** (Família, Clientes, Alunos...). Quem não tem conta recebe um convite.
 - 🔐 **Você escolhe o que cada um pode fazer:**
@@ -134,7 +132,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## 📥 8. Trazer tudo do Google Drive
 
-<img src="../img/drive/importacao.svg" alt="Importar do Google Drive" width="100%">
+<img src="https://cdn.inglescurso.org/file/1Y6bumIfUBZJh1KrdUR97OIocbNawfuHz/nebula-drive-print-importacao.png" alt="Importar do Google Drive" width="100%">
 
 - 🔌 **Conecte uma ou várias contas** do Google Drive, cole o link da pasta e clique em **Importar**.
 - 🚀 **O servidor copia sozinho**, sem usar a sua internet — pode até desligar o computador.
@@ -145,7 +143,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## ✨ 9. Assistente de Inteligência Artificial
 
-<img src="../img/drive/ia.svg" alt="Assistente de IA" width="100%">
+<img src="https://cdn.inglescurso.org/file/1maKH3VQdMtrOyb6gftQ7ankh91Gwc2J8/nebula-drive-print-ia.png" alt="Assistente de IA" width="100%">
 
 - 🔎 **Encontre arquivos conversando:** *"Onde está o relatório do mês passado?"*
 - 📄 **Resuma documentos** abertos na tela.
@@ -170,7 +168,7 @@ Suas pastas de vídeo viram uma plataforma de streaming:
 
 ## 🛠️ 12. Painel do administrador
 
-<img src="../img/drive/admin.svg" alt="Administração" width="100%">
+<img src="https://cdn.inglescurso.org/file/1d8I6lBZN-QUL-fjcae0yhyC0WaMEmY28/nebula-drive-print-admin.png" alt="Administração" width="100%">
 
 Para quem cuida do sistema:
 

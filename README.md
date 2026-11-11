@@ -80,7 +80,7 @@ Pronto! Abra `http://IP_DO_SERVIDOR:8082` no navegador e entre como administrado
 ## 💎 Quer mais? Conheça o Nébula Drive
 
 <div align="center">
-<img src="img/drive/filmes.svg" alt="Nébula Drive — biblioteca de filmes" width="90%">
+<img src="https://cdn.inglescurso.org/file/1hNoblJw-DtPJSNEO-GfrPvwFWMUPBXsb/nebula-drive-print-filmes.png" alt="Nébula Drive — biblioteca de filmes" width="90%">
 </div>
 
 O **Nébula Drive** é a edição completa: junta em um só lugar a sua **nuvem pessoal** (como o Google Drive),
@@ -111,9 +111,9 @@ um **player de músicas** e um **Office online** para criar e editar documentos.
 
 <table>
 <tr>
-<td><img src="img/drive/serie.svg" alt="Séries"></td>
-<td><img src="img/drive/leitor-voz.svg" alt="Leitor com voz"></td>
-<td><img src="img/drive/compartilhar.svg" alt="Compartilhar"></td>
+<td><img src="https://cdn.inglescurso.org/file/1oXFOiBdiWOut8Qmib4-SOVdolX6SB0h-/nebula-drive-print-serie.png" alt="Séries"></td>
+<td><img src="https://cdn.inglescurso.org/file/1CsUvjgGvBGhGteDkVBHScDQsRD9epxD-/nebula-drive-print-leitor-voz.png" alt="Leitor de livros e documentos"></td>
+<td><img src="https://cdn.inglescurso.org/file/1DEEiowlq5aUEd3wb6XFT4ezOvSuEZMzD/nebula-drive-print-compartilhar.png" alt="Compartilhar"></td>
 </tr>
 <tr>
 <td align="center">🎬 Séries por temporada</td>

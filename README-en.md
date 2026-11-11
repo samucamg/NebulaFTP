@@ -80,7 +80,7 @@ Done! Open `http://SERVER_IP:8082` in your browser and log in as admin.
 ## 💎 Want more? Meet Nébula Drive
 
 <div align="center">
-<img src="img/drive/filmes.svg" alt="Nébula Drive — movie library" width="90%">
+<img src="https://cdn.inglescurso.org/file/1hNoblJw-DtPJSNEO-GfrPvwFWMUPBXsb/nebula-drive-print-filmes.png" alt="Nébula Drive — movie library" width="90%">
 </div>
 
 **Nébula Drive** is the full edition: it brings together your **personal cloud** (like Google Drive),
@@ -111,9 +111,9 @@ a **music player** and an **online Office** to create and edit documents.
 
 <table>
 <tr>
-<td><img src="img/drive/serie.svg" alt="Series"></td>
-<td><img src="img/drive/leitor-voz.svg" alt="Reader with voice"></td>
-<td><img src="img/drive/compartilhar.svg" alt="Sharing"></td>
+<td><img src="https://cdn.inglescurso.org/file/1oXFOiBdiWOut8Qmib4-SOVdolX6SB0h-/nebula-drive-print-serie.png" alt="Series"></td>
+<td><img src="https://cdn.inglescurso.org/file/1CsUvjgGvBGhGteDkVBHScDQsRD9epxD-/nebula-drive-print-leitor-voz.png" alt="Book and document reader"></td>
+<td><img src="https://cdn.inglescurso.org/file/1DEEiowlq5aUEd3wb6XFT4ezOvSuEZMzD/nebula-drive-print-compartilhar.png" alt="Sharing"></td>
 </tr>
 <tr>
 <td align="center">🎬 Series by season</td>
