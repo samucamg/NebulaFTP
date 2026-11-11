@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Novo usuário' if mode == 'add' else 'Editar usuário' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Novo usuário' if mode == 'add' else 'Editar ' ~ login }}</h1>
+{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+<div class="card" style="max-width: 420px;">
+  <form method="post" action="{{ '/users/add' if mode == 'add' else '/users/edit/' ~ login }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if mode == 'add' %}
+    <p><label>Login<br><input type="text" name="login" value="{{ login }}" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_\-]{3,32}" autocomplete="off"></label></p>
+    <p class="muted" style="font-size:13px;margin-top:-6px;">De 3 a 32 letras, números, _ ou -. A pasta /login é criada automaticamente.</p>
+    <p><label>Senha<br><input type="password" name="password" required autocomplete="new-password"></label></p>
+    {% else %}
+    <p><label>Nova senha (deixe em branco para manter)<br><input type="password" name="password" autocomplete="new-password"></label></p>
+    {% endif %}
+    <p>
+      {% if locked %}
+        <label><input type="checkbox" checked disabled> Administrador</label>
+        <span class="muted" style="font-size:13px;">O admin principal é sempre administrador.</span>
+      {% else %}
+        <label><input type="checkbox" name="is_admin" value="1" {{ 'checked' if is_admin }}> Administrador</label>
+      {% endif %}
+    </p>
+    <p class="actions">
+      <button type="submit">Salvar</button>
+      <a class="btn secondary" href="/users">Cancelar</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

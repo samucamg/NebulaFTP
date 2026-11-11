@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block content %}
+<h1>{{ name }}</h1>
+<div class="card">
+  {% if kind == 'video' %}
+    <video controls preload="metadata" src="{{ src }}"></video>
+  {% else %}
+    <audio controls preload="metadata" src="{{ src }}"></audio>
+  {% endif %}
+</div>
+<p class="actions">
+  <a class="btn secondary" href="{{ back }}">Voltar à pasta</a>
+  <a class="btn secondary" href="{{ download }}">Baixar</a>
+</p>
+{% endblock %}

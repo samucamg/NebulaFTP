@@ -1,10 +1,14 @@
 .env
-__pycache__
-*.session*
-*_test.py
-
-# Artefatos de runtime
+*.session
+*.session-journal
+*.db
+*.db-wal
+*.db-shm
+data/
 staging/
-nebula.db
-nebula.log
-sftp_host_key
+sftp_host_key*
+.venv/
+__pycache__/
+.pytest_cache/
+*.log
+*.out

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+{% block content %}
+<h1>Usuários</h1>
+{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+<p><a class="btn" href="/users/add">Novo usuário</a></p>
+<div class="card table-wrap">
+  <table>
+    <thead><tr><th>Login</th><th>Admin</th><th>Ações</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.login }}</td>
+        <td>{{ 'sim' if u.is_admin else 'não' }}</td>
+        <td>
+          <div class="actions">
+            <a href="/users/edit/{{ u.login }}">Editar</a>
+            {% if u.login != admin_login and u.login != me.login %}
+            <form class="inline" method="post" action="/users/delete/{{ u.login }}"
+                  onsubmit="return confirm('Remover o usuário {{ u.login|e }}?');">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <label><input type="checkbox" name="delete_files" value="1"> apagar arquivos</label>
+              <button type="submit" class="danger">Remover</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

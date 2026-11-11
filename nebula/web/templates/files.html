@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Arquivos{% endblock %}
+{% block content %}
+<h1>Arquivos</h1>
+<nav class="crumbs" aria-label="Caminho">
+  {% for c in crumbs %}
+    {% if not loop.first %}<span class="sep">/</span>{% endif %}
+    {% if loop.last %}<strong>{{ c.name }}</strong>{% else %}<a href="/files?{{ {'path': c.path}|urlencode }}">{{ c.name }}</a>{% endif %}
+  {% endfor %}
+</nav>
+
+<div class="card">
+  <form class="row-form" method="post" action="/files/mkdir">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="path" value="{{ path }}">
+    <input type="text" name="name" placeholder="Nome da nova pasta" required maxlength="255">
+    <button type="submit">Nova pasta</button>
+  </form>
+  <form class="row-form" method="post" action="/files/upload" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="path" value="{{ path }}">
+    <input type="file" name="files" multiple required>
+    <button type="submit">Enviar arquivos</button>
+  </form>
+  <p class="muted" style="margin:0;font-size:13px;">Arquivos grandes são enviados em partes. Enquanto aparecer "enviando ao Telegram", baixar e reproduzir já funcionam, mas podem ser mais lentos.</p>
+</div>
+
+<div class="card table-wrap">
+  {% if items %}
+  <table>
+    <thead>
+      <tr><th>Nome</th><th class="hide-sm">Tamanho</th><th class="hide-sm">Modificado</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+    {% for it in items %}
+      <tr>
+        <td>
+          {% if it.is_dir %}
+            <a href="/files?{{ {'path': it.path}|urlencode }}">{{ it.name }}/</a>
+          {% else %}
+            {{ it.name }}
+            {% if not it.synced %}<span class="badge">enviando ao Telegram</span>{% endif %}
+          {% endif %}
+        </td>
+        <td class="num hide-sm">{% if not it.is_dir %}{{ it.size|filesize }}{% else %}&ndash;{% endif %}</td>
+        <td class="num hide-sm">{{ it.mtime|dt }}</td>
+        <td>
+          <div class="actions">
+            {% if not it.is_dir %}
+              <a href="/files/download?{{ {'path': it.path}|urlencode }}">Baixar</a>
+              {% if it.media %}<a href="/files/play?{{ {'path': it.path}|urlencode }}">Tocar</a>{% endif %}
+            {% endif %}
+            <form class="inline" method="post" action="/files/rename">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <input type="hidden" name="path" value="{{ it.path }}">
+              <input type="text" name="new_name" value="{{ it.name }}" required maxlength="255" aria-label="Novo nome">
+              <button type="submit" class="secondary">Renomear</button>
+            </form>
+            <form class="inline" method="post" action="/files/delete"
+                  onsubmit="return confirm('Apagar este item{{ ' e todo o conteúdo' if it.is_dir }}?');">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <input type="hidden" name="path" value="{{ it.path }}">
+              <button type="submit" class="danger">Apagar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Esta pasta está vazia.</p>
+  {% endif %}
+</div>
+{% endblock %}

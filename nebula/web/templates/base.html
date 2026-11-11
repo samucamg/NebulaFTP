@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Painel{% endblock %} · NebulaFTP</title>
+<style>
+:root {
+  --bg: #f4f6fb; --fg: #1d2433; --muted: #667085; --card: #ffffff; --line: #e2e6ef;
+  --accent: #4f46e5; --accent-fg: #ffffff; --danger: #b42318; --warn: #b54708; --ok: #067647;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1420; --fg: #e6eaf2; --muted: #98a2b3; --card: #171e2e; --line: #2a3347;
+    --accent: #818cf8; --accent-fg: #0f1420; --danger: #f97066; --warn: #fdb022; --ok: #32d583;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1420; --fg: #e6eaf2; --muted: #98a2b3; --card: #171e2e; --line: #2a3347;
+  --accent: #818cf8; --accent-fg: #0f1420; --danger: #f97066; --warn: #fdb022; --ok: #32d583;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+header { background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+header .brand { font-weight: 700; color: var(--accent); text-decoration: none; font-size: 17px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+nav a { color: var(--fg); text-decoration: none; padding: 6px 10px; border-radius: 6px; }
+nav a:hover, nav a.active { background: var(--line); }
+main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 16px; }
+footer { color: var(--muted); text-align: center; font-size: 13px; padding: 16px; border-top: 1px solid var(--line); }
+h1 { font-size: 22px; margin: 8px 0 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.muted { color: var(--muted); }
+.alert { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--danger); color: var(--danger); }
+button, .btn { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 6px; padding: 7px 12px; font: inherit; cursor: pointer; text-decoration: none; display: inline-block; }
+button.secondary, .btn.secondary { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+button.danger { background: var(--danger); color: #fff; }
+input[type=text], input[type=password], input[type=file] { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); max-width: 100%; }
+label { display: inline-flex; gap: 6px; align-items: center; }
+form.inline { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0; }
+.row-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 12px; }
+.crumbs a { color: var(--accent); text-decoration: none; }
+.crumbs .sep { color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+td.num { white-space: nowrap; }
+.badge { font-size: 12px; border: 1px solid var(--warn); color: var(--warn); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.actions a { color: var(--accent); text-decoration: none; }
+video, audio { width: 100%; max-height: 70vh; background: #000; border-radius: 8px; }
+@media (max-width: 600px) {
+  main { padding: 12px; }
+  th.hide-sm, td.hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/files">NebulaFTP</a>
+  {% if me %}
+  <nav>
+    <a href="/files" class="{{ 'active' if request.path == '/files' }}">Arquivos</a>
+    {% if me.is_admin %}<a href="/users" class="{{ 'active' if request.path.startswith('/users') }}">Usuários</a>{% endif %}
+    <span class="muted">{{ me.login }}{% if me.is_admin %} (admin){% endif %}</span>
+    <form class="inline" method="post" action="/logout">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="secondary">Sair</button>
+    </form>
+  </nav>
+  {% endif %}
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+<footer>NebulaFTP Community</footer>
+</body>
+</html>
