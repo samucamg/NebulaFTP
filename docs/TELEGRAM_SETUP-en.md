@@ -9,8 +9,8 @@ This guide shows you how to create and configure everything you need on Telegram
 ## 🎯 What You Need
 
 1. **API Credentials** (API_ID and API_HASH)
-2. **Bot Token(s)** (1 or more bots — Community uses only the 1st)
-3. **Private Channel** (where your files will be stored)
+2. **Bot Token** (ONE bot)
+3. **Private Channel** (ONE channel, where your files will be stored)
 4. **Channel ID** (numeric identifier)
 
 ---
@@ -53,7 +53,9 @@ App api_hash: abc123def456789...
 
 ---
 
-## 🤖 Step 2: Create Bot(s)
+## 🤖 Step 2: Create the Bot
+
+The Nebula FTP Community uses **one bot** and **one channel**. The token of that bot goes into `BOT_TOKENS` in your `.env`.
 
 ### 2.1 Open BotFather
 
@@ -74,15 +76,7 @@ Use this token to access the HTTP API:
 1234567890:AABBccDDeeFFggHH...
 ```
 
-✅ **Copy and save** this token — it goes into `BOT_TOKENS` in your `.env`.
-
-### 2.4 (Optional) Create More Bots — Nébula Drive 💎
-
-The Community version uses **only the first token**. For Multi-Bot (4–8 bots, up to 60 MB/s),
-see the [Nébula Drive](NEBULA-DRIVE-en.md).
-
-If you want to create extra bots for a future Nébula Drive upgrade, repeat the steps above and separate
-the tokens with commas in `BOT_TOKENS`.
+✅ **Copy and save** this token — it goes into `BOT_TOKENS` in your `.env` (the bot token).
 
 ---
 
@@ -95,15 +89,13 @@ In Telegram:
 2. Name: `Nebula FTP Storage` (any name)
 3. Type: **Private** ⚠️ IMPORTANT!
 
-### 3.2 Add the Bot(s) as Admin
+### 3.2 Add the Bot as Admin
 
 1. Open the channel
 2. Menu → **Administrators** → **Add Admin**
 3. Search for the bot username (e.g. `@nebula_ftp_bot`)
 4. Check **all permissions**
 5. Save
-
-Repeat for every bot you created.
 
 ---
 
@@ -129,9 +121,9 @@ Before continuing, confirm you have:
 
 - [ ] `API_ID` (8 digits)
 - [ ] `API_HASH` (32 characters)
-- [ ] `BOT_TOKENS` (one or more tokens)
+- [ ] `BOT_TOKENS` (the bot token)
 - [ ] Private channel created
-- [ ] Bot(s) added as admin in the channel
+- [ ] Bot added as admin in the channel
 - [ ] `CHAT_ID` of the channel (format: `-100XXXXXXXXX`)
 
 ---

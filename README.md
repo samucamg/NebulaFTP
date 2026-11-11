@@ -19,16 +19,17 @@
 
 ## 💡 O que você ganha
 
-- ☁️ **Espaço ilimitado** — seus arquivos ficam guardados em um canal privado do Telegram. Sem mensalidade de armazenamento.
+- ☁️ **Espaço ilimitado** — seus arquivos ficam guardados em um canal privado do Telegram. Sem mensalidade de armazenamento. (A velocidade de envio é limitada, pois esta edição usa um único bot — veja abaixo.)
 - 💽 **Funciona como um disco no seu PC** — aparece no Windows como uma unidade (`Z:`), sem ocupar o seu HD.
 - 🌐 **Acesse de qualquer lugar** — entre pelo navegador para enviar, baixar, renomear e organizar.
 - 🎬 **Assista e ouça na hora** — vídeos e músicas tocam direto no navegador, sem baixar o arquivo inteiro.
+- 🖼️ **Fotos abrem direto no navegador** — JPG, PNG, GIF, WebP, AVIF e BMP, além do player de vídeo e áudio.
 - 👨‍👩‍👧 **Vários usuários** — cada pessoa tem a própria pasta e só vê o que é dela.
 - 🛠️ **Você no comando** — crie, edite e remova usuários pelo painel.
 - 🔒 **Seguro** — conexão criptografada e senhas protegidas.
 - 🆓 **Grátis e de código aberto** — instale em poucos minutos no seu computador ou servidor.
 
-> ℹ️ Esta edição gratuita usa **um robô do Telegram**, então o espaço é ilimitado, mas a velocidade
+> ℹ️ Esta edição gratuita usa **um único bot do Telegram**, então o espaço é ilimitado, mas a velocidade
 > de envio tem um teto (cerca de 10 MB/s). Precisa de mais? Veja o [**Nébula Drive**](#-quer-mais-conheça-o-nébula-drive).
 
 ---
@@ -58,7 +59,7 @@
 
 ## 🚀 Instale em 3 passos
 
-Você vai precisar de uma conta no Telegram. O [📖 guia do Telegram](docs/TELEGRAM_SETUP.md) mostra como criar o robô e o canal, passo a passo.
+Você vai precisar de uma conta no Telegram. O [📖 guia do Telegram](docs/TELEGRAM_SETUP.md) mostra como criar o bot e o canal, passo a passo.
 
 ```bash
 # 1) Baixe
@@ -93,7 +94,6 @@ um **player de músicas** e um **Office online** para criar e editar documentos.
 | Acesso como disco no computador | ✅ | ✅ PC, Mac, celular e TV |
 | Vários usuários, cada um com sua pasta | ✅ | ✅ + grupos, cotas e prazo de acesso |
 | Assistir vídeos e ouvir músicas no navegador | ✅ básico | ✅ estilo Netflix |
-| Velocidade de envio | 1 robô | ⚡ vários robôs, muito mais rápido |
 | Compartilhar como no Google Drive (links com senha e validade) | ❌ | ✅ |
 | Bibliotecas com capas, sinopses e temporadas | ❌ | ✅ |
 | "Continuar assistindo" e "Continuar lendo" | ❌ | ✅ |
@@ -104,9 +104,7 @@ um **player de músicas** e um **Office online** para criar e editar documentos.
 | Histórico de versões, lixeira e favoritos | ❌ | ✅ |
 | Assistente de Inteligência Artificial | ❌ | ✅ |
 | Assistir na Smart TV (Jellyfin, Kodi) | ❌ | ✅ |
-| Cópia de segurança automática dos arquivos | ❌ | ✅ |
 | App para celular e computador, tema escuro | ❌ | ✅ |
-| Banco MongoDB (para instalações grandes) | ❌ | ✅ |
 | Suporte | Comunidade | Prioritário |
 
 <table>
@@ -134,12 +132,11 @@ um **player de músicas** e um **Office online** para criar e editar documentos.
 
 **O espaço é ilimitado de verdade?** O Telegram não cobra nem limita o espaço. O limite desta edição é a velocidade de envio.
 
-**Meus arquivos ficam públicos?** Não. Eles ficam em um canal **privado**, que só o seu robô acessa.
+**Meus arquivos ficam públicos?** Não. Eles ficam em um canal **privado**, que só o seu bot acessa.
 
 **Preciso deixar o computador ligado?** O sistema precisa ficar ligado para você acessar os arquivos. O ideal é instalar em um servidor (VPS).
 
-**Posso perder meus arquivos?** Guarde uma cópia do arquivo do banco de dados: é ele que sabe onde cada arquivo está. O Nébula Drive faz cópias de segurança automáticas.
-
+**Posso perder meus arquivos?** Guarde uma cópia do arquivo do banco de dados: é ele que sabe onde cada arquivo está.
 ---
 
 ## 🤝 Contribuindo

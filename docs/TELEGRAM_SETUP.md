@@ -9,8 +9,8 @@ Este guia ensina como criar e configurar tudo que você precisa no Telegram para
 ## 🎯 O Que Você Precisa
 
 1. **API Credentials** (API_ID e API_HASH)
-2. **Bot Token(s)** (1 ou mais bots — Community usa apenas o 1º)
-3. **Canal Privado** (onde os arquivos ficam)
+2. **Token do bot** (UM bot)
+3. **Canal Privado** (UM canal, onde os arquivos ficam)
 4. **ID do Canal** (número de identificação)
 
 ---
@@ -52,7 +52,9 @@ App api_hash: abc123def456789...
 
 ---
 
-## 🤖 Passo 2: Criar Bot(s)
+## 🤖 Passo 2: Criar o Bot
+
+O NebulaFTP Community usa **um bot** e **um canal**. O token desse bot vai na variável `BOT_TOKENS` do `.env`.
 
 ### 2.1 Abra o BotFather
 
@@ -73,15 +75,7 @@ Use this token to access the HTTP API:
 1234567890:AABBccDDeeFFggHH...
 ```
 
-✅ **Copie e salve** esse token — ele vai para `BOT_TOKENS` no `.env`.
-
-### 2.4 (Opcional) Criar Mais Bots — Nébula Drive 💎
-
-A versão Community usa **apenas o primeiro token**. Para Multi-Bot (4-8 bots, até 60 MB/s),
-veja a [Nébula Drive](NEBULA-DRIVE.md).
-
-Se quiser criar bots extras para futura migração para o Nébula Drive, repita os passos acima e separe os tokens
-por vírgula em `BOT_TOKENS`.
+✅ **Copie e salve** esse token — ele vai para `BOT_TOKENS` no `.env` (o token do bot).
 
 ---
 
@@ -94,15 +88,13 @@ No Telegram:
 2. Nome: `Nebula FTP Storage` (qualquer nome)
 3. Tipo: **Private** ⚠️ IMPORTANTE!
 
-### 3.2 Adicionar o(s) Bot(s) como Admin
+### 3.2 Adicionar o Bot como Admin
 
 1. Abra o canal
 2. Menu → **Administrators** → **Add Admin**
 3. Busque pelo username do bot (ex: `@nebula_ftp_bot`)
 4. Marque **todas as permissões**
 5. Salve
-
-Repita para todos os bots criados.
 
 ---
 
@@ -128,9 +120,9 @@ Antes de continuar, confirme:
 
 - [ ] `API_ID` (8 dígitos)
 - [ ] `API_HASH` (32 caracteres)
-- [ ] `BOT_TOKENS` (um ou mais tokens)
+- [ ] `BOT_TOKENS` (o token do bot)
 - [ ] Canal privado criado
-- [ ] Bot(s) adicionado(s) como admin no canal
+- [ ] Bot adicionado como admin no canal
 - [ ] `CHAT_ID` do canal (formato: `-100XXXXXXXXX`)
 
 ---

@@ -72,6 +72,8 @@ docker compose logs -f nebulaftp
 ```
 
 > Tudo que precisa persistir (banco, staging, cache, chave SFTP e sessão do bot) fica em `./data`.
+>
+> As portas são lidas do `.env`: `SFTP_PORT` (padrão `2222`) e `WEB_PORT` (padrão `8082`). Para mudar, basta alterar essas variáveis no `.env` e rodar `docker compose up -d --build`.
 
 ### Opção 2 — Python direto 🐍
 
@@ -125,7 +127,7 @@ journalctl -u nebulaftp -f
 - Em **Usuários**: crie, altere senha ou exclua. Cada usuário ganha a pasta `/<login>`
   e, ao conectar, **enxerga só ela** como raiz.
 - O mesmo login e senha valem para o **SFTP** (porta `2222`).
-- ⛔ Após 5 senhas erradas, o login fica bloqueado por 60 segundos.
+- ⛔ Após 5 senhas erradas, aquele endereço IP fica bloqueado para esse usuário por 60 segundos.
 
 ---
 
@@ -134,7 +136,7 @@ journalctl -u nebulaftp -f
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `API_ID` / `API_HASH` | — | Credenciais de [my.telegram.org](https://my.telegram.org) |
-| `BOT_TOKENS` | — | Token do bot *(Community usa 1 bot; vários bots = Nébula Drive 💎)* |
+| `BOT_TOKENS` | — | Token do bot |
 | `CHAT_ID` | — | ID do canal onde os arquivos são salvos (formato `-100...`) |
 | `WEB_ADMIN_USER` | `admin` | Login do administrador |
 | `WEB_ADMIN_PASSWORD` | — | Senha do administrador (obrigatória na 1ª execução) |
@@ -163,7 +165,7 @@ O Nebula FTP é um servidor SFTP padrão — pode ser montado como **unidade de 
 | Linux — pasta montada ou WebDAV para outros apps | **rclone** (mount + `serve webdav`) |
 | Windows/Linux — linha de comando | **rclone** |
 
-### 🪟 Windows — RaiDrive (recomendado)
+### 🪟 Windows — RaiDrive
 
 1. Baixe e instale o [RaiDrive](https://www.raidrive.com/).
 2. Abra o RaiDrive → **Add** → grupo **NAS** → **SFTP**.
@@ -174,7 +176,7 @@ O Nebula FTP é um servidor SFTP padrão — pode ser montado como **unidade de 
 4. Escolha a letra (ex.: `Z:`) → **Connect**.
 5. Pronto: o "disco" aparece no **Windows Explorer** com seus arquivos do Telegram. ✅
 
-> Também funciona com **FileZilla** e **WinSCP**: protocolo **SFTP**, porta `2222`.
+> **WinSCP** foi verificado. **FileZilla** e **RaiDrive** funcionam por SFTP padrão (protocolo **SFTP**, porta `2222`), mas ainda não foram verificados oficialmente.
 
 ### 🐧 Linux — rclone (mount e WebDAV)
 
@@ -230,8 +232,7 @@ rclone mount nebula: N: --vfs-cache-mode writes
 
 - 🔑 Senhas com hash **scrypt**; formulários com proteção **CSRF**.
 - 🌐 O painel web usa HTTP. Na internet, coloque-o atrás de um proxy com **HTTPS** (Caddy, Nginx).
-- 💾 **Faça backup do banco** (`DB_FILE`): sem ele não é possível remontar os arquivos a partir do canal.
-- ☁️ A Community não tem canal de backup: guarde cópias do que for importante.
+- 💾 **Guarde cópias do banco SQLite** (`DB_FILE`): sem ele não é possível remontar os arquivos a partir do canal.
 
 ---
 
@@ -239,7 +240,7 @@ rclone mount nebula: N: --vfs-cache-mode writes
 
 | Problema | Causa provável / solução |
 |---|---|
-| `Connection refused` | Servidor parado, porta errada ou firewall. Libere `2222` e `8082`. |
+| `Connection refused` | Servidor parado, porta errada ou firewall. Libere as portas `SFTP_PORT` e `WEB_PORT` (padrão `2222` e `8082`). |
 | Erro de relógio / `msg_id too low` na partida | Relógio do servidor errado. Ative o NTP (`timedatectl set-ntp true`). |
 | `Peer id invalid` nos logs | O bot não é admin do canal — adicione como administrador. |
 | Esqueci a senha do admin | Defina no `.env` um **novo** `WEB_ADMIN_USER` com `WEB_ADMIN_PASSWORD` e reinicie: um novo admin é criado. Entre com ele e troque a senha do antigo pelo painel. |

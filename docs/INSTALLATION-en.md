@@ -72,6 +72,8 @@ docker compose logs -f nebulaftp
 ```
 
 > Everything that must persist (database, staging, cache, SFTP key and bot session) lives in `./data`.
+>
+> Ports are read from `.env`: `SFTP_PORT` (default `2222`) and `WEB_PORT` (default `8082`). To change them, just edit these variables in `.env` and run `docker compose up -d --build`.
 
 ### Option 2 — Python directly 🐍
 
@@ -125,7 +127,7 @@ journalctl -u nebulaftp -f
 - Under **Users**: create, change password or delete. Each user gets the folder `/<login>`
   and, when connected, **sees only it** as the root.
 - The same login and password work for **SFTP** (port `2222`).
-- ⛔ After 5 wrong passwords, the login is locked for 60 seconds.
+- ⛔ After 5 wrong passwords, that IP address is locked out for that user for 60 seconds.
 
 ---
 
@@ -134,7 +136,7 @@ journalctl -u nebulaftp -f
 | Variable | Default | Description |
 |---|---|---|
 | `API_ID` / `API_HASH` | — | Credentials from [my.telegram.org](https://my.telegram.org) |
-| `BOT_TOKENS` | — | Bot token *(Community uses 1 bot; multiple bots = Nébula Drive 💎)* |
+| `BOT_TOKENS` | — | Bot token |
 | `CHAT_ID` | — | ID of the channel where files are stored (format `-100...`) |
 | `WEB_ADMIN_USER` | `admin` | Administrator login |
 | `WEB_ADMIN_PASSWORD` | — | Administrator password (required on first run) |
@@ -163,7 +165,7 @@ Nebula FTP is a standard SFTP server — it can be mounted as a **network drive*
 | Linux — mounted folder or WebDAV for other apps | **rclone** (mount + `serve webdav`) |
 | Windows/Linux — command line | **rclone** |
 
-### 🪟 Windows — RaiDrive (recommended)
+### 🪟 Windows — RaiDrive
 
 1. Download and install [RaiDrive](https://www.raidrive.com/).
 2. Open RaiDrive → **Add** → group **NAS** → **SFTP**.
@@ -174,7 +176,7 @@ Nebula FTP is a standard SFTP server — it can be mounted as a **network drive*
 4. Pick a letter (e.g. `Z:`) → **Connect**.
 5. Done: the "drive" shows up in **Windows Explorer** with your Telegram files. ✅
 
-> Also works with **FileZilla** and **WinSCP**: protocol **SFTP**, port `2222`.
+> **WinSCP** has been verified. **FileZilla** and **RaiDrive** work over standard SFTP (protocol **SFTP**, port `2222`), but have not been officially verified yet.
 
 ### 🐧 Linux — rclone (mount and WebDAV)
 
@@ -230,8 +232,7 @@ rclone mount nebula: N: --vfs-cache-mode writes
 
 - 🔑 **scrypt** password hashes; forms protected against **CSRF**.
 - 🌐 The web panel uses HTTP. On the internet, put it behind an **HTTPS** proxy (Caddy, Nginx).
-- 💾 **Back up the database** (`DB_FILE`): without it, files cannot be reassembled from the channel.
-- ☁️ Community has no backup channel: keep copies of anything important.
+- 💾 **Keep copies of the SQLite database** (`DB_FILE`): without it, files cannot be reassembled from the channel.
 
 ---
 
@@ -239,7 +240,7 @@ rclone mount nebula: N: --vfs-cache-mode writes
 
 | Problem | Likely cause / fix |
 |---|---|
-| `Connection refused` | Server stopped, wrong port or firewall. Open `2222` and `8082`. |
+| `Connection refused` | Server stopped, wrong port or firewall. Open the `SFTP_PORT` and `WEB_PORT` ports (default `2222` and `8082`). |
 | Clock error / `msg_id too low` at startup | Wrong server clock. Enable NTP (`timedatectl set-ntp true`). |
 | `Peer id invalid` in logs | The bot is not a channel admin — add it as administrator. |
 | Forgot the admin password | Set a **new** `WEB_ADMIN_USER` with `WEB_ADMIN_PASSWORD` in `.env` and restart: a new admin is created. Log in with it and reset the old one's password in the panel. |

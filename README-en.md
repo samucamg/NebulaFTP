@@ -19,10 +19,11 @@
 
 ## 💡 What you get
 
-- ☁️ **Unlimited space** — your files are kept in a private Telegram channel. No storage fees.
+- ☁️ **Unlimited space** — your files are kept in a private Telegram channel. No storage fees. (Upload speed is limited, since this edition uses a single bot — see below.)
 - 💽 **Works like a drive on your PC** — shows up in Windows as a drive (`Z:`), without using your hard disk.
 - 🌐 **Access from anywhere** — use your browser to upload, download, rename and organize.
 - 🎬 **Watch and listen right away** — videos and music play in the browser, without downloading the whole file.
+- 🖼️ **Photos open right in the browser** — JPG, PNG, GIF, WebP, AVIF and BMP, along with the video and audio player.
 - 👨‍👩‍👧 **Multiple users** — each person has their own folder and sees only what is theirs.
 - 🛠️ **You're in charge** — create, edit and remove users from the panel.
 - 🔒 **Secure** — encrypted connection and protected passwords.
@@ -93,7 +94,6 @@ a **music player** and an **online Office** to create and edit documents.
 | Access as a drive on your computer | ✅ | ✅ PC, Mac, phone and TV |
 | Multiple users, each with their own folder | ✅ | ✅ + groups, quotas and access expiry |
 | Watch videos and play music in the browser | ✅ basic | ✅ Netflix-style |
-| Upload speed | 1 bot | ⚡ several bots, much faster |
 | Google Drive-style sharing (links with password and expiry) | ❌ | ✅ |
 | Libraries with covers, synopses and seasons | ❌ | ✅ |
 | "Continue watching" and "Continue reading" | ❌ | ✅ |
@@ -104,9 +104,7 @@ a **music player** and an **online Office** to create and edit documents.
 | Version history, trash and favorites | ❌ | ✅ |
 | Artificial Intelligence assistant | ❌ | ✅ |
 | Watch on Smart TV (Jellyfin, Kodi) | ❌ | ✅ |
-| Automatic backup of your files | ❌ | ✅ |
 | App for phone and computer, dark theme | ❌ | ✅ |
-| MongoDB database (for large installs) | ❌ | ✅ |
 | Support | Community | Priority |
 
 <table>
@@ -138,8 +136,7 @@ a **music player** and an **online Office** to create and edit documents.
 
 **Do I need to keep my computer on?** The system must be running for you to reach your files. Installing it on a server (VPS) is ideal.
 
-**Can I lose my files?** Keep a copy of the database file: it's what knows where each file is. Nébula Drive makes automatic backups.
-
+**Can I lose my files?** Keep a copy of the database file: it's what knows where each file is.
 ---
 
 ## 🤝 Contributing
